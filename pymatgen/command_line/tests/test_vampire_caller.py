@@ -1,30 +1,27 @@
-# coding: utf-8
 # Copyright (c) Pymatgen Development Team.
 # Distributed under the terms of the MIT License.
 
-import unittest
+from __future__ import annotations
+
 import os
+import unittest
 import warnings
+from shutil import which
 
 import pandas as pd
-
-from monty.os.path import which
+from pytest import approx
 
 import pymatgen.command_line.vampire_caller as vampirecaller
-from pymatgen.analysis.magnetism.heisenberg import HeisenbergMapper
+from pymatgen.core.structure import Structure
+from pymatgen.util.testing import PymatgenTest
 
-from pymatgen import Structure
-
-test_dir = os.path.join(
-    os.path.dirname(__file__), "..", "..", "..", "test_files", "magnetic_orderings"
-)
+test_dir = os.path.join(PymatgenTest.TEST_FILES_DIR, "magnetic_orderings")
 
 
 @unittest.skipIf(not which("vampire-serial"), "vampire executable not present")
 class VampireCallerTest(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
-
         print("Testing with: ", which("vampire-serial"))
 
         cls.Mn3Al = pd.read_json(os.path.join(test_dir, "Mn3Al.json"))
@@ -55,13 +52,25 @@ class VampireCallerTest(unittest.TestCase):
                 structs,
                 energies,
                 mc_box_size=3.0,
-                equil_timesteps=1000,
-                mc_timesteps=2000,
+                equil_timesteps=1000,  # 1000
+                mc_timesteps=2000,  # 2000
                 user_input_settings=settings,
             )
 
-            critical_temp = vc.output.critical_temp
-            self.assertAlmostEqual(400, critical_temp, delta=100)
+            voutput = vc.output
+            critical_temp = voutput.critical_temp
+            assert approx(critical_temp) == 400
+
+        if os.path.exists("Mn3Al.mat"):
+            os.remove("Mn3Al.mat")
+        if os.path.exists("Mn3Al.ucf"):
+            os.remove("Mn3Al.ucf")
+        if os.path.exists("input"):
+            os.remove("input")
+        if os.path.exists("log"):
+            os.remove("log")
+        if os.path.exists("output"):
+            os.remove("output")
 
 
 if __name__ == "__main__":

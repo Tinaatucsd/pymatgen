@@ -1,15 +1,15 @@
-# coding: utf-8
 # Copyright (c) Pymatgen Development Team.
 # Distributed under the terms of the MIT License.
 
-from pymatgen.util.testing import PymatgenTest
+from __future__ import annotations
+
 from pymatgen.core.libxcfunc import LibxcFunc
+from pymatgen.util.testing import PymatgenTest
 
 
 class LibxcFuncTest(PymatgenTest):
     def test_libxcfunc_api(self):
         """Testing libxcfunc_api."""
-
         # LDA correlation: Hedin & Lundqvist
         xc = LibxcFunc.LDA_C_HL
         print(xc)

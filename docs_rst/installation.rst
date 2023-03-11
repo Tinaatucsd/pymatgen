@@ -1,3 +1,7 @@
+============
+Installation
+============
+
 Requirements
 ============
 
@@ -17,7 +21,7 @@ Optional libraries that are required if you need certain features.
 3. Atomistic Simulation Environment or ASE 3.6+: Required for the usage of the
    adapters in pymatgen.io.aseio between pymatgen's core Structure object and
    the Atoms object used by ASE. Get it at https://wiki.fysik.dtu.dk/ase/.
-   Note that the ASE package is incompatible with Python 3.x at the moment.
+   Note that the ASE package is compatible with Python 3.5+ at the moment.
 4. OpenBabel with Python bindings (http://openbabel.org): Required for the
    usage of the adapters in pymatgen.io.babelio between pymatgen's Molecule
    and OpenBabel's OBMol. Opens up input and output support for the very large
@@ -25,6 +29,12 @@ Optional libraries that are required if you need certain features.
 5. networkx: For graph analysis associated with critic2 topological analysis
    of electron charge densities, pygraphviz is also required for visualization.
 6. pytest - For unittesting. Not optional for developers.
+7. numba: Optionally can be installed for faster evaluation of certain 
+   functionality, such as the SubstrateAnalyzer. It incurrs an initial 
+   slowdown the first time the relevant function is called, as it is 
+   compiled, for dramatically faster subsequent evaluations. Note that 
+   numba places additional constraints on the versions of numpy and 
+   Python that may be used.
 
 Optional non-Python programs
 ----------------------------
@@ -42,8 +52,8 @@ the moment) required only for certain features:
    of disordered structures via EnumerateStructureTransformation. Many other
    advanced transformations (e.g., MagOrderingTransformation) use
    EnumerateStructureTransformation. The enum.x and makestr.x
-   executables must be in the path. Get it at http://enum.sourceforge.net and
-   follow the instructions to compile multienum.x and makestr.x.
+   executables must be in the path. Get it at http://github.com/msg-byu/enumlib and
+   follow the instructions to compile enum.x and makestr.x.
 3. bader: For use with :class:`pymatgen.command_line.bader_caller.BaderAnalysis`.
    This library by Henkelmann et al. provides a robust way to calculate the
    Bader analysis from a CHGCAR. The bader executable must be in the path.
@@ -66,7 +76,7 @@ Conda-based install
 ===================
 
 For these instructions, we will assume the **64-bit** versions of all OSes.
-For OSX and Linux, both latest Python 3.x adn 2.7 are supported. For Windows,
+For OSX and Linux, both latest Python 3.x and 2.7 are supported. For Windows,
 only latest Python 3.x is supported. Most common functionality should work
 out of the box on Windows, but some specialized analyses relying on external
 programs may require you to compile those programs from source.
@@ -130,7 +140,7 @@ POTCAR Setup
 ============
 
 For the code to generate POTCAR files, it needs to know where the VASP
-pseudopotential files are.  We are not allowed to distribute these under the
+pseudopotential files are. We are not allowed to distribute these under the
 VASP license. The good news is that the `pmg` command line utility includes a
 config functionality.
 
@@ -189,10 +199,38 @@ to see full list of choices.
 
 .. note::
 
-    The Materials Project uses the 2012 versions of the VASP pseudopotentials.
-    As such, the pymatgen compatibility package assume this version. If you use
-    any functional other than PBE, note that you should not be combining results
-    from these other functionals with Materials Project data.
+    The Materials Project currently uses older versions of the VASP pseudopotentials
+    for maximum compatibility with historical data, rather than the current 52/54
+    pseudopotentials. This setting can be overridden by the user if desired.
+    As such, current versions of pymatgen will check the hashes of your pseudopotentials
+    when constructing input sets to ensure the correct, compatible pseudopotential sets are
+    used, so that total energies can be compared to those in the Materials Project database.
+    If you use any functional other than PBE, note that you should not be combining results
+    from these other functionals with Materials Project data. For up-to-date information
+    on this, please consult the Materials Project documentation.
+
+PyPy Support
+============
+
+`PyPy <https://www.pypy.org>`_ is an alternative Python interpreter for running Python code
+and comes with significant speed improvements for common applications. However, historically,
+fewer packages offer PyPy support.
+
+It is possible to install and use pymatgen with the PyPy interpreter
+but it comes with some important caveats:
+
+* While it is usable, PyPy is not officially supported by pymatgen. We do not run our
+  full test suite on PyPy and it's possible some parts of pymatgen will be broken.
+* All of pymatgen's dependencies now support PyPy including numpy, scipy, and pandas,
+  however matplotlib is difficult to install. If trying PyPy, the current advice
+  is to remove the matplotlib dependency, however this means any modules using matplotlib
+  will not be importable. The easiest way to install dependencies is using the
+  `PyPy builds on conda-forge <https://conda-forge.org/blog/2020/03/10/pypy>`_. For spglib,
+  cloning the repository and running ``python setup.py install`` manually is advised.
+* Performance improvements are unpredictable. Since pymatgen makes heavy use of numpy
+  and custom extensions where appropriate, many code hot spots have already been optimized.
+
+We welcome any developers interested in expanding our PyPy support.
 
 Setup for Developers (using GitHub)
 ===================================
@@ -216,7 +254,7 @@ Mac OSX
 
       xcode-select --install
 
-2. (Optional) Install gfortran.  Get an installer at
+2. (Optional) Install gfortran. Get an installer at
    http://gcc.gnu.org/wiki/GFortranBinaries#MacOS.
 
 Linux
@@ -251,7 +289,7 @@ Installation tips for optional libraries
 ========================================
 
 This section provides a guide for installing various optional libraries used in
-pymatgen.  Some of the python libraries are rather tricky to build in certain
+pymatgen. Some of the python libraries are rather tricky to build in certain
 operating systems, especially for users unfamiliar with building C/C++ code.
 Please feel free to send in suggestions to update the instructions based on
 your experiences. In all the instructions, it is assumed that you have standard
@@ -391,54 +429,6 @@ Here are the steps that I took to make it work:
 Zeo++
 -----
 
-If you use the defects analysis package, you will need to installZeo++/Voro++.
-Here are the steps you need to follow (thanks to Bharat)
+If you use the defects analysis package, you will need to install Zeo++.
 
-Download and install Voro++::
-
-    mkdir Voro++
-    mkdir Voro++/voro
-    cd Voro++/voro
-    svn checkout --username anonsvn https://code.lbl.gov/svn/voro/trunk  # password is 'anonsvn'
-    cd trunk
-
-Add -fPIC to the CFLAGS variable in config.mk, and then::
-
-    make
-
-Download and install Zeo++::
-
-    mkdir Zeo++
-    mkdir Zeo++/zeo
-    cd Zeo++/zeo
-    svn checkout --username anonsvn https://code.lbl.gov/svn/zeo/trunk  # password is 'anonsvn'
-    cd trunk
-    make dylib
-
-Create python bindings with Cython::
-
-    pip install cython
-    cd cython_wrapper
-    python setup_alt.py develop
-
-To test that the installation worked, here is an example series of things you
-can do using pymatgen::
-
-    In [1]: from pymatgen.analysis.defects.point_defects import Interstitial
-
-    In [2]: from pymatgen.core.structure import Structure
-
-    In [3]: structure = Structure.from_file('/path/to/file')
-
-    In [4]: radii, valences = {}, {}
-
-    In [5]: for element in structure.composition.elements:
-       ...:     radii[element.symbol] = element.atomic_radius
-       ...:     valence = element.group  # Just a first guess..
-       ...:     if element.group > 12:
-       ...:         valence -= 10
-       ...:     valences[element.symbol] = valence
-
-    In [6]: interstitial = Interstitial(structure, radii=radii, valences=valences)
-
-    In [7]: interstitial._defect_sites
+The download and installation instructions for Zeo++ can be found here: http://www.zeoplusplus.org/

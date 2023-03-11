@@ -1,4 +1,3 @@
-# coding: utf-8
 # Copyright (c) Pymatgen Development Team.
 # Distributed under the terms of the MIT License.
 
@@ -7,25 +6,21 @@ This module provides core classes needed by all define electronic structure,
 such as the Spin, Orbital, etc.
 """
 
-from monty.json import MSONable
-from enum import Enum, unique
-import numpy as np
+from __future__ import annotations
 
-__author__ = "Shyue Ping Ong"
-__copyright__ = "Copyright 2011, The Materials Project"
-__version__ = "1.0"
-__maintainer__ = "Shyue Ping Ong"
-__email__ = "shyuep@gmail.com"
-__status__ = "Production"
-__date__ = "Sep 23, 2011"
+from enum import Enum, unique
+
+import numpy as np
+from monty.json import MSONable
 
 
 @unique
 class Spin(Enum):
     """
-    Enum type for Spin.  Only up and down.
+    Enum type for Spin. Only up and down.
     Usage: Spin.up, Spin.down.
     """
+
     up, down = (1, -1)
 
     def __int__(self):
@@ -51,7 +46,7 @@ class OrbitalType(Enum):
     f = 3
 
     def __str__(self):
-        return self.name
+        return str(self.name)
 
 
 @unique
@@ -82,13 +77,14 @@ class Orbital(Enum):
         return self.value
 
     def __str__(self):
-        return self.name
+        return str(self.name)
 
     @property
     def orbital_type(self):
         """
         Returns OrbitalType of an orbital.
         """
+        # pylint: disable=E1136
         return OrbitalType[self.name[0]]
 
 
@@ -149,13 +145,13 @@ class Magmom(MSONable):
             saxis = moment.saxis
             moment = moment.moment
 
-        moment = np.array(moment, dtype='d')
+        moment = np.array(moment, dtype="d")
         if moment.ndim == 0:
             moment = moment * [0, 0, 1]
 
         self.moment = moment
 
-        saxis = np.array(saxis, dtype='d')
+        saxis = np.array(saxis, dtype="d")
 
         self.saxis = saxis / np.linalg.norm(saxis)
 
@@ -176,8 +172,8 @@ class Magmom(MSONable):
         magmom = Magmom(global_moment)
         return cls(magmom.get_moment(saxis=saxis), saxis=saxis)
 
-    def _get_transformation_matrix(self, saxis):
-
+    @classmethod
+    def _get_transformation_matrix(cls, saxis):
         saxis = saxis / np.linalg.norm(saxis)
 
         alpha = np.arctan2(saxis[1], saxis[0])
@@ -188,14 +184,16 @@ class Magmom(MSONable):
         sin_a = np.sin(alpha)
         sin_b = np.sin(beta)
 
-        m = [[cos_b * cos_a, -sin_a, sin_b * cos_a],
-             [cos_b * sin_a, cos_a, sin_b * sin_a],
-             [-sin_b, 0, cos_b]]
+        m = [
+            [cos_b * cos_a, -sin_a, sin_b * cos_a],
+            [cos_b * sin_a, cos_a, sin_b * sin_a],
+            [-sin_b, 0, cos_b],
+        ]
 
         return m
 
-    def _get_transformation_matrix_inv(self, saxis):
-
+    @classmethod
+    def _get_transformation_matrix_inv(cls, saxis):
         saxis = saxis / np.linalg.norm(saxis)
 
         alpha = np.arctan2(saxis[1], saxis[0])
@@ -206,9 +204,11 @@ class Magmom(MSONable):
         sin_a = np.sin(alpha)
         sin_b = np.sin(beta)
 
-        m = [[cos_b * cos_a, cos_b * sin_a, -sin_b],
-             [-sin_a, cos_a, 0],
-             [sin_b * cos_a, sin_b * sin_a, cos_b]]
+        m = [
+            [cos_b * cos_a, cos_b * sin_a, -sin_b],
+            [-sin_a, cos_a, 0],
+            [sin_b * cos_a, sin_b * sin_a, cos_b],
+        ]
 
         return m
 
@@ -219,10 +219,9 @@ class Magmom(MSONable):
         Magmom's internal spin quantization axis, i.e. equivalent to
         Magmom.moment
 
-        :param axis: (list/numpy array) spin quantization axis
+        :param saxis: (list/numpy array) spin quantization axis
         :return: np.ndarray of length 3
         """
-
         # transform back to moment with spin axis [0, 0, 1]
         m_inv = self._get_transformation_matrix_inv(self.saxis)
         moment = np.matmul(self.moment, m_inv)
@@ -300,8 +299,7 @@ class Magmom(MSONable):
                 t = -t
                 new_saxis = -new_saxis
             return Magmom([0, 0, t], saxis=new_saxis)
-        else:
-            return Magmom(self)
+        return Magmom(self)
 
     @staticmethod
     def have_consistent_saxis(magmoms):
@@ -320,8 +318,7 @@ class Magmom(MSONable):
         match_ref = [magmom.saxis == ref_saxis for magmom in magmoms]
         if np.all(match_ref):
             return True
-        else:
-            return False
+        return False
 
     @staticmethod
     def get_consistent_set_and_saxis(magmoms, saxis=None):
@@ -334,12 +331,9 @@ class Magmom(MSONable):
         :return: (list of Magmoms, global spin axis) tuple
         """
         magmoms = [Magmom(magmom) for magmom in magmoms]
-        if saxis is None:
-            saxis = Magmom.get_suggested_saxis(magmoms)
-        else:
-            saxis = saxis / np.linalg.norm(saxis)
+        saxis = Magmom.get_suggested_saxis(magmoms) if saxis is None else saxis / np.linalg.norm(saxis)
         magmoms = [magmom.get_moment(saxis=saxis) for magmom in magmoms]
-        return (magmoms, saxis)
+        return magmoms, saxis
 
     @staticmethod
     def get_suggested_saxis(magmoms):
@@ -364,11 +358,10 @@ class Magmom(MSONable):
         magmoms.sort(reverse=True)
         if len(magmoms) > 0:
             return magmoms[0].get_00t_magmom_with_xyz_saxis().saxis
-        else:
-            return np.array([0, 0, 1], dtype="d")
+        return np.array([0, 0, 1], dtype="d")
 
     @staticmethod
-    def are_collinear(magmoms):
+    def are_collinear(magmoms) -> bool:
         """
         Method checks to see if a set of magnetic moments are collinear
         with each other.
@@ -377,7 +370,7 @@ class Magmom(MSONable):
         """
         magmoms = [Magmom(magmom) for magmom in magmoms]
         if not Magmom.have_consistent_saxis(magmoms):
-            magmoms = Magmom.get_consistent_set(magmoms)
+            magmoms = Magmom.get_consistent_set_and_saxis(magmoms)[0]
 
         # convert to numpy array for convenience
         magmoms = np.array([list(magmom) for magmom in magmoms])
@@ -391,8 +384,7 @@ class Magmom(MSONable):
         num_ncl = np.count_nonzero(np.linalg.norm(np.cross(ref_magmom, magmoms), axis=1))
         if num_ncl > 0:
             return False
-        else:
-            return True
+        return True
 
     @classmethod
     def from_moment_relative_to_crystal_axes(cls, moment, lattice):
@@ -401,7 +393,7 @@ class Magmom(MSONable):
         relative to crystal axes.
 
         Used for obtaining moments from magCIF file.
-        :param magmom: list of floats specifying vector magmom
+        :param moment: list of floats specifying vector magmom
         :param lattice: Lattice
         :return: Magmom
         """
@@ -417,7 +409,6 @@ class Magmom(MSONable):
         If scalar magmoms, moments will be given arbitrarily along z.
         Used for writing moments to magCIF file.
 
-        :param magmom: Magmom
         :param lattice: Lattice
         :return: vector as list of floats
         """
@@ -438,15 +429,16 @@ class Magmom(MSONable):
     def __abs__(self):
         return np.linalg.norm(self.moment)
 
-    def __eq__(self, other):
+    def __eq__(self, other: object) -> bool:
         """
         Equal if 'global' magnetic moments are the same, saxis can differ.
         """
-        other = Magmom(other)
-        return np.allclose(self.global_moment, other.global_moment)
+        try:
+            other_magmom = Magmom(other)
+        except (TypeError, ValueError):
+            return NotImplemented
 
-    def __ne__(self, other):
-        return not self.__eq__(other)
+        return np.allclose(self.global_moment, other_magmom.global_moment)
 
     def __lt__(self, other):
         return abs(self) < abs(other)
@@ -471,7 +463,7 @@ class Magmom(MSONable):
         user intervention.
 
         However, should be used with caution for non-collinear
-        structures and might give non-sensical results except in the case
+        structures and might give nonsensical results except in the case
         of only slightly non-collinear structures (e.g. small canting).
 
         This approach is also used to obtain "diff" VolumetricDensity
@@ -485,7 +477,5 @@ class Magmom(MSONable):
 
     def __repr__(self):
         if np.allclose(self.saxis, (0, 0, 1)):
-            return 'Magnetic moment {0}'.format(self.moment)
-        else:
-            return 'Magnetic moment {0} (spin axis = {1})'.format(self.moment,
-                                                                  self.saxis)
+            return f"Magnetic moment {self.moment}"
+        return f"Magnetic moment {self.moment} (spin axis = {self.saxis})"

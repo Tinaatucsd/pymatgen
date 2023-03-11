@@ -1,0 +1,45 @@
+exclude: ^(docs|.*test_files|cmd_line|tasks.py)
+
+ci:
+  autoupdate_schedule: monthly
+  skip: [mypy]
+
+repos:
+  - repo: https://github.com/charliermarsh/ruff-pre-commit
+    rev: v0.0.254
+    hooks:
+      - id: ruff
+        args: [--fix, --ignore, 'D,SIM']
+
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v4.4.0
+    hooks:
+      - id: check-yaml
+        exclude: pymatgen/analysis/vesta_cutoffs.yaml
+      - id: end-of-file-fixer
+      - id: trailing-whitespace
+
+  - repo: https://github.com/psf/black
+    rev: 23.1.0
+    hooks:
+      - id: black
+
+  - repo: https://github.com/pre-commit/mirrors-mypy
+    rev: v1.0.1
+    hooks:
+      - id: mypy
+
+  - repo: https://github.com/codespell-project/codespell
+    rev: v2.2.2
+    hooks:
+      - id: codespell
+        stages: [commit, commit-msg]
+        exclude_types: [html]
+        additional_dependencies: [tomli] # needed to read pyproject.toml below py3.11
+
+  - repo: https://github.com/MarcoGorelli/cython-lint
+    rev: v0.12.5
+    hooks:
+      - id: cython-lint
+        args: [--no-pycodestyle]
+      - id: double-quote-cython-strings

@@ -1,25 +1,47 @@
 # cython: boundscheck=False
 # cython: wraparound=False
 # cython: nonecheck=False
-# cython: cdivision=True
+# cython: cdivision=False
 # cython: profile=True
-# cython: language_level=3
-from __future__ import print_function
+# distutils: language = c
+
+# isort: dont-add-imports
+
 import numpy as np
+
 cimport numpy as np
-cimport cython
-from cython.operator cimport dereference, postincrement
-from libc.math cimport round, pi, sqrt, ceil, floor
-from libc.stdlib cimport malloc, free, realloc
-from libcpp.vector cimport vector
-from libcpp.map cimport map
+from libc.math cimport ceil, floor, pi, sqrt
+from libc.stdlib cimport free, malloc, realloc
 from libc.string cimport memset
 
 
-def find_points_in_spheres(double[:, ::1] all_coords, double[:, ::1] center_coords, float r, long[:] pbc, double[:, ::1] lattice, double tol=1e-8):
+cdef void *safe_malloc(size_t size) except? NULL:
+    """Raise memory error if malloc fails"""
+    if size == 0:
+        return NULL
+    cdef void *ptr = malloc(size)
+    if ptr == NULL:
+        raise MemoryError(f"Memory allocation of {size} bytes failed!")
+    return ptr
+
+
+cdef void *safe_realloc(void *ptr_orig, size_t size) except? NULL:
+    """Raise memory error if realloc fails"""
+    if size == 0:
+        free(ptr_orig)
+        return NULL
+    cdef void *ptr = realloc(ptr_orig, size)
+    if ptr == NULL:
+        raise MemoryError(f"Realloc memory of {size} bytes failed!")
+    return ptr
+
+
+def find_points_in_spheres(double[:, ::1] all_coords, double[:, ::1] center_coords,
+                           float r, long[:] pbc, double[:, ::1] lattice,
+                           double tol=1e-8, float min_r=1.0):
     """
     For each point in `center_coords`, get all the neighboring points in `all_coords` that are within the
-    cutoff radius `r`. All the coordinates should be in cartesian.
+    cutoff radius `r`. All the coordinates should be in Cartesian.
 
     Args:
         all_coords: (np.ndarray[double, dim=2]) all available points. When periodic boundary is considered,
@@ -28,11 +50,23 @@ def find_points_in_spheres(double[:, ::1] all_coords, double[:, ::1] center_coor
         r: (float) cutoff radius
         pbc: (list of bool) whether to set periodic boundaries
         lattice: (np.ndarray[double, dim=2]) 3x3 lattice matrix
-        numerical_tol: (float) numerical tolerance
+        tol: (float) numerical tolerance
+        min_r: (float) minimal cutoff to calculate the neighbor list
+            directly. If the cutoff is less than this value, the algorithm
+            will calculate neighbor list using min_r as cutoff and discard
+            those that have larger distances.
     Returns:
         index1 (n, ), index2 (n, ), offset_vectors (n, 3), distances (n, ). index1 of center_coords, and index2 of all_coords that form the neighbor pair
             offset_vectors are the periodic image offsets for the all_coords.
     """
+    if r < min_r:
+        findex1, findex2, foffset_vectors, fdistances = find_points_in_spheres(
+            all_coords=all_coords, center_coords=center_coords,
+            r=min_r + tol, pbc=pbc, lattice=lattice, tol=tol, min_r=min_r)
+        mask = fdistances <= r
+        return findex1[mask], findex2[mask], foffset_vectors[mask], fdistances[
+            mask]
+
     cdef int i, j, k, l, m, n
     cdef double maxr[3]
     # valid boundary, that is the minimum in center_coords - r
@@ -51,14 +85,14 @@ def find_points_in_spheres(double[:, ::1] all_coords, double[:, ::1] center_coor
     # Process pbc
     cdef int n_center = center_coords.shape[0]
     cdef int n_total = all_coords.shape[0]
-    cdef double [:, ::1] frac_coords =  <double[:n_center, :3]> malloc(n_center * 3 * sizeof(double))
+    cdef double [:, ::1] frac_coords =  <double[:n_center, :3]> safe_malloc(n_center * 3 * sizeof(double))
     cdef long[3] max_bounds = [1, 1, 1]
     cdef long[3] min_bounds = [0, 0, 0]
     cdef long nlattice = 1
     cdef long count = 0
-    cdef double[:, ::1] all_fcoords = <double[:n_total, :3]> malloc(n_total * 3 * sizeof(double))
-    cdef double[:, ::1] coords_in_cell = <double[:n_total, :3]> malloc(n_total * 3 * sizeof(double))
-    cdef double[:, ::1] offset_correction = <double[:n_total, :3]> malloc(n_total * 3 * sizeof(double))
+    cdef double[:, ::1] all_fcoords = <double[:n_total, :3]> safe_malloc(n_total * 3 * sizeof(double))
+    cdef double[:, ::1] coords_in_cell = <double[:n_total, :3]> safe_malloc(n_total * 3 * sizeof(double))
+    cdef double[:, ::1] offset_correction = <double[:n_total, :3]> safe_malloc(n_total * 3 * sizeof(double))
 
     get_frac_coords(lattice, all_coords, offset_correction)
     for i in range(n_total):
@@ -79,10 +113,10 @@ def find_points_in_spheres(double[:, ::1] all_coords, double[:, ::1] center_coor
     matmul(all_fcoords, lattice, coords_in_cell)
 
     # Get translated images, coordinates and indices
-    cdef long natoms = nlattice * n_total
-    cdef double *offsets_p_temp = <double*> malloc(natoms * 3 * sizeof(double))
-    cdef double *expanded_coords_p_temp = <double *> malloc(natoms * 3 * sizeof(double))
-    cdef long *indices_p_temp = <long*> malloc(natoms * sizeof(long))
+    cdef long natoms = n_total
+    cdef double *offsets_p_temp = <double*> safe_malloc(natoms * 3 * sizeof(double))
+    cdef double *expanded_coords_p_temp = <double *> safe_malloc(natoms * 3 * sizeof(double))
+    cdef long *indices_p_temp = <long*> safe_malloc(natoms * sizeof(long))
     cdef double coord_temp[3]
 
     count = 0
@@ -91,8 +125,8 @@ def find_points_in_spheres(double[:, ::1] all_coords, double[:, ::1] center_coor
             for k in range(min_bounds[2], max_bounds[2]):
                 for l in range(n_total):
                     for m in range(3):
-                        coord_temp[m] = i * lattice[0, m] + <double>j * lattice[1, m] + \
-                            k * lattice[2, m] + coords_in_cell[l, m]
+                        coord_temp[m] = <double>i * lattice[0, m] + <double>j * lattice[1, m] + \
+                            <double>k * lattice[2, m] + coords_in_cell[l, m]
                     if (coord_temp[0] > valid_min[0]) & (coord_temp[0] < valid_max[0]) & \
                         (coord_temp[1] > valid_min[1]) & (coord_temp[1] < valid_max[1]) & \
                         (coord_temp[2] > valid_min[2]) & (coord_temp[2] < valid_max[2]):
@@ -104,6 +138,11 @@ def find_points_in_spheres(double[:, ::1] all_coords, double[:, ::1] center_coor
                         expanded_coords_p_temp[3*count+1] = coord_temp[1]
                         expanded_coords_p_temp[3*count+2] = coord_temp[2]
                         count += 1
+                        if count >= natoms:  # exceeding current memory
+                            natoms += natoms
+                            offsets_p_temp = <double*>safe_realloc(offsets_p_temp, natoms * 3 * sizeof(double))
+                            expanded_coords_p_temp = <double*>safe_realloc(expanded_coords_p_temp, natoms * 3 * sizeof(double))
+                            indices_p_temp = <long*>safe_realloc(indices_p_temp, natoms * sizeof(long))
 
     # if no valid neighbors were found return empty
     if count == 0:
@@ -118,9 +157,9 @@ def find_points_in_spheres(double[:, ::1] all_coords, double[:, ::1] center_coor
             np.array([[], [], []], dtype=float).T, np.array([], dtype=float))
 
     # Delete those beyond (min_center_coords - r, max_center_coords + r)
-    cdef double *offsets_p = <double*> realloc(offsets_p_temp, count * 3 * sizeof(double))
-    cdef double *expanded_coords_p = <double*> realloc(expanded_coords_p_temp, count * 3 * sizeof(double))
-    cdef long *indices_p = <long*> realloc(indices_p_temp, count * sizeof(long))
+    cdef double *offsets_p = <double*> safe_realloc(offsets_p_temp, count * 3 * sizeof(double))
+    cdef double *expanded_coords_p = <double*> safe_realloc(expanded_coords_p_temp, count * 3 * sizeof(double))
+    cdef long *indices_p = <long*> safe_realloc(indices_p_temp, count * sizeof(long))
 
     cdef double[:, ::1] offsets = <double[:count, :3]> offsets_p
     cdef double[:, ::1] expanded_coords = <double[:count, :3]> expanded_coords_p
@@ -129,8 +168,8 @@ def find_points_in_spheres(double[:, ::1] all_coords, double[:, ::1] center_coor
     # Construct linked cell list
     natoms = count
     cdef long ncube[3]
-    cdef long[:, ::1] all_indices3 = <long[:natoms, :3]> malloc(natoms * 3 * sizeof(long))
-    cdef long[::1] all_indices1 = <long[:natoms]> malloc(natoms * sizeof(long))
+    cdef long[:, ::1] all_indices3 = <long[:natoms, :3]> safe_malloc(natoms * 3 * sizeof(long))
+    cdef long[::1] all_indices1 = <long[:natoms]> safe_malloc(natoms * sizeof(long))
 
     for i in range(3):
         ncube[i] = <long>(ceil((valid_max[i] - valid_min[i]) / ledge))
@@ -139,30 +178,30 @@ def find_points_in_spheres(double[:, ::1] all_coords, double[:, ::1] center_coor
     three_to_one(all_indices3, ncube[1], ncube[2], all_indices1)
 
     cdef long nb_cubes = ncube[0] * ncube[1] * ncube[2]
-    cdef long *head = <long*> malloc(nb_cubes*sizeof(long))
-    cdef long *atom_indices = <long*> malloc(natoms*sizeof(long))
+    cdef long *head = <long*> safe_malloc(nb_cubes*sizeof(long))
+    cdef long *atom_indices = <long*> safe_malloc(natoms*sizeof(long))
     memset(<void*>head, -1, nb_cubes*sizeof(long))
     memset(<void*>atom_indices, -1, natoms*sizeof(long))
-    cdef map[long, vector[long]] neighbor_map = get_cube_neighbors(ncube)
+
+    cdef long[:, ::1] neighbor_map = <long[:nb_cubes, :27]> safe_malloc(nb_cubes * 27 * sizeof(long))
+    get_cube_neighbors(ncube, neighbor_map)
     for i in range(natoms):
         atom_indices[i] = head[all_indices1[i]]
         head[all_indices1[i]] = i
 
     # Get center atoms' cube indices
-    cdef long[:, ::1] center_indices3 = <long[:n_center, :3]> malloc(n_center*3*sizeof(long))
-    cdef long *center_indices1 = <long*> malloc(n_center*sizeof(long))
+    cdef long[:, ::1] center_indices3 = <long[:n_center, :3]> safe_malloc(n_center*3*sizeof(long))
+    cdef long *center_indices1 = <long*> safe_malloc(n_center*sizeof(long))
     compute_cube_index(center_coords, valid_min, ledge, center_indices3)
     three_to_one(center_indices3, ncube[1], ncube[2], <long[:n_center]>center_indices1)
 
     # it works by allocate incrementally n more memory locations, I found it 3x faster to do so
     # compared to using vectors in cpp
     n = 10000
-    cdef long *index_1 = <long*> malloc(n*sizeof(long))
-    cdef long *index_2 = <long*> malloc(n*sizeof(long))
-    cdef double *offset_final = <double*> malloc(3*n*sizeof(double))
-    cdef double *distances = <double*> malloc(n*sizeof(double))
-    cdef vector[long] ncube_indices_temp
-    cdef vector[long].iterator it
+    cdef long *index_1 = <long*> safe_malloc(n*sizeof(long))
+    cdef long *index_2 = <long*> safe_malloc(n*sizeof(long))
+    cdef double *offset_final = <double*> safe_malloc(3*n*sizeof(double))
+    cdef double *distances = <double*> safe_malloc(n*sizeof(double))
     cdef long cube_index_temp
     cdef long link_index
     cdef double d_temp2
@@ -171,11 +210,12 @@ def find_points_in_spheres(double[:, ::1] all_coords, double[:, ::1] center_coor
     count = 0
     for i in range(n_center):
         ncube_indices_temp = neighbor_map[center_indices1[i]]
-        it = ncube_indices_temp.begin()
-        while (it != ncube_indices_temp.end()):
-            cube_index_temp = dereference(it)
+        for j in ncube_indices_temp:
+            if j == -1:
+                continue
+            cube_index_temp = j
             link_index = head[cube_index_temp]
-            while (link_index != -1):
+            while link_index != -1:
                 d_temp2 = distance2(expanded_coords, center_coords, link_index, i, 3)
                 if d_temp2 < r2 + tol:
                     index_1[count] = i
@@ -188,14 +228,12 @@ def find_points_in_spheres(double[:, ::1] all_coords, double[:, ::1] center_coor
                     count += 1
                     # increasing the memory size
                     if count >= n:
-                        n += 10000
-                        # may not be safe to assign so, but if realloc fails the program fails
-                        index_1 = <long*>realloc(index_1, n * sizeof(long))
-                        index_2 = <long*>realloc(index_2, n*sizeof(long))
-                        offset_final = <double*> realloc(offset_final, 3*n*sizeof(double))
-                        distances = <double*> realloc(distances, n*sizeof(double))
+                        n += n  # double the size
+                        index_1 = <long*>safe_realloc(index_1, n * sizeof(long))
+                        index_2 = <long*>safe_realloc(index_2, n*sizeof(long))
+                        offset_final = <double*>safe_realloc(offset_final, 3*n*sizeof(double))
+                        distances = <double*>safe_realloc(distances, n*sizeof(double))
                 link_index = atom_indices[link_index]
-            postincrement(it)
 
     if count == 0:
         free(index_1)
@@ -207,6 +245,7 @@ def find_points_in_spheres(double[:, ::1] all_coords, double[:, ::1] center_coor
         free(&all_fcoords[0, 0])
         free(&coords_in_cell[0, 0])
         free(&center_indices3[0, 0])
+        free(&neighbor_map[0, 0])
         free(offsets_p)
         free(expanded_coords_p)
         free(indices_p)
@@ -215,12 +254,13 @@ def find_points_in_spheres(double[:, ::1] all_coords, double[:, ::1] center_coor
         free(center_indices1)
         free(head)
         free(atom_indices)
+
         return np.array([], dtype=int), np.array([], dtype=int), np.array([[], [], []], dtype=float).T, np.array([], dtype=float)
 
-    index_1 = <long*>realloc(index_1, count * sizeof(long))
-    index_2 = <long*>realloc(index_2, count*sizeof(long))
-    offset_final = <double*> realloc(offset_final, 3*count*sizeof(double))
-    distances = <double*> realloc(distances, count*sizeof(double))
+    index_1 = <long*>safe_realloc(index_1, count * sizeof(long))
+    index_2 = <long*>safe_realloc(index_2, count*sizeof(long))
+    offset_final = <double*>safe_realloc(offset_final, 3*count*sizeof(double))
+    distances = <double*>safe_realloc(distances, count*sizeof(double))
 
     # convert to python objects
     py_index_1 = np.array(<long[:count]>index_1)
@@ -238,6 +278,7 @@ def find_points_in_spheres(double[:, ::1] all_coords, double[:, ::1] center_coor
     free(&all_fcoords[0, 0])
     free(&coords_in_cell[0, 0])
     free(&center_indices3[0, 0])
+    free(&neighbor_map[0, 0])
     free(offsets_p)
     free(expanded_coords_p)
     free(indices_p)
@@ -259,15 +300,20 @@ cdef double distance2(double[:, ::1] m1, double[:, ::1] m2, long index1, long in
         s += (m1[index1, i] - m2[index2, i]) * (m1[index1, i] - m2[index2, i])
     return s
 
-cdef map[long, vector[long]] get_cube_neighbors(long [:] ncube):
+cdef void get_cube_neighbors(long [:] ncube, long[:, ::1] neighbor_map):
     """
     Get {cube_index: cube_neighbor_indices} map
     """
     cdef long ncubes = ncube[0] * ncube[1] * ncube[2]
-    cdef long[:, ::1] cube_indices_3d = <long[:ncubes, :3]> malloc(ncubes*3*sizeof(long))
-    cdef long[::1] cube_indices_1d = <long[:ncubes]> malloc(ncubes*sizeof(long))
+    memset(<void*>&neighbor_map[0, 0], -1, neighbor_map.shape[0] * 27 * sizeof(long))
+    cdef long[::1] counts = <long[:ncubes]> safe_malloc(ncubes * sizeof(long))
+    cdef long[:, ::1] cube_indices_3d = <long[:ncubes, :3]> safe_malloc(ncubes*3*sizeof(long))
+    cdef long[::1] cube_indices_1d = <long[:ncubes]> safe_malloc(ncubes*sizeof(long))
     cdef long count = 0
     cdef int i, j, k
+
+    for i in range(ncubes):
+        counts[i] = 0
 
     for i in range(ncube[0]):
         for j in range(ncube[1]):
@@ -277,10 +323,10 @@ cdef map[long, vector[long]] get_cube_neighbors(long [:] ncube):
                 cube_indices_3d[count, 2] = k
                 count += 1
     three_to_one(cube_indices_3d, ncube[1], ncube[2], cube_indices_1d)
-    cdef long[:, ::1] index3 = <long[:1, :3]> malloc(3*sizeof(long))
+    cdef long[:, ::1] index3 = <long[:1, :3]> safe_malloc(3*sizeof(long))
     cdef long index1[1]
-    cdef map[long, vector[long]] neighbor_map
     cdef long[:, ::1] ovectors = compute_offset_vectors(1)
+
     for i in range(ncubes):
         for j in range(27):
             index3[0, 0] = ovectors[j, 0] + cube_indices_3d[i, 0]
@@ -289,11 +335,13 @@ cdef map[long, vector[long]] get_cube_neighbors(long [:] ncube):
             if (index3[0, 0] < ncube[0]) & (index3[0, 0] >= 0) & (index3[0, 1] < ncube[1]) & \
                 (index3[0, 1] >= 0) & (index3[0, 2] < ncube[2]) & (index3[0, 2] >= 0):
                 three_to_one(index3, ncube[1], ncube[2], index1)
-                neighbor_map[i].push_back(index1[0])
+                neighbor_map[i, counts[i]] = index1[0]
+                counts[i] += 1
+
     free(&cube_indices_3d[0, 0])
     free(&cube_indices_1d[0])
     free(&index3[0, 0])
-    return neighbor_map
+    free(&counts[0])
 
 cdef void get_bounds(double[:, ::1] frac_coords, double[::1] maxr, long[:] pbc, long[:] max_bounds, long[:] min_bounds):
     """Given the fractional coordinates and the number of repeation needed in each direction, maxr,
@@ -340,7 +388,7 @@ cdef void matrix_inv(double[:, ::1] matrix, double[:, ::1] inv):
     cdef int i, j
     for i in range(3):
         for j in range(3):
-            inv[i, j] = (matrix[(j+1)%3, (i+1)%3] * matrix[(j+2)%3, (i+2)%3] - \
+            inv[i, j] = (matrix[(j+1)%3, (i+1)%3] * matrix[(j+2)%3, (i+2)%3] -
                 matrix[(j+2)%3, (i+1)%3] * matrix[(j+1)%3, (i+2)%3]) / det
 
 cdef double matrix_det(double[:, ::1] matrix):
@@ -436,18 +484,6 @@ cdef void compute_cube_index(double[:, ::1] coords, double [:] global_min, doubl
             return_indice[i, j] = <long>(floor((coords[i, j] - global_min[j] + 1e-8) / radius))
 
 
-cdef void one_to_three(long[::1] label1d, long ny, long nz, long[:, ::1] label3d) nogil:
-    """
-    1D label vector to 3D label representation
-    """
-    cdef int i
-    cdef int n = label1d.shape[0]
-    for i in range(n):
-        label3d[i, 2] = label1d[i] % nz
-        label3d[i, 1] = ((label1d[i] - label3d[i, 2]) / nz) % ny
-        label3d[i, 0] = (label1d[i] - label3d[i, 2] - label3d[i, 1] * nz) / (ny * nz)
-
-
 cdef void three_to_one(long[:, ::1] label3d, long ny, long nz, long[::1] label1d) nogil:
     """
     3D vector representation to 1D
@@ -457,14 +493,13 @@ cdef void three_to_one(long[:, ::1] label3d, long ny, long nz, long[::1] label1d
     for i in range(n):
         label1d[i] = label3d[i, 0] * ny * nz + label3d[i, 1] * nz + label3d[i, 2]
 
+
 def compute_offset_vectors(long n):
     cdef long i, j, k
-    cdef long v[3]
     cdef double center[8][3] # center vertices coords
     cdef int ind
-    cdef bint is_within
     cdef long ntotal = (2*n+1) * (2*n+1) * (2*n+1)
-    cdef long *ovectors = <long*> malloc(ntotal*3*sizeof(long))
+    cdef long *ovectors = <long*> safe_malloc(ntotal*3*sizeof(long))
     cdef long count = 0
     for i in range(2):
         for j in range(2):
@@ -474,7 +509,7 @@ def compute_offset_vectors(long n):
                 center[ind][1] = j - 0.5
                 center[ind][2] = k - 0.5
 
-    cdef double off[8][3] # offseted vertices
+    cdef double off[8][3] # offsetted vertices
     for i in range(-n, n + 1):
         for j in range(-n, n + 1):
             for k in range(-n, n + 1):
@@ -484,7 +519,7 @@ def compute_offset_vectors(long n):
                     ovectors[3*count + 1] = j
                     ovectors[3*count + 2] = k
                     count += 1
-    ovectors = <long*> realloc(ovectors, count*3*sizeof(long))
+    ovectors = <long*>safe_realloc(ovectors, count*3*sizeof(long))
     array = np.array(<long[:count, :3]>ovectors)
     free(ovectors)
     return array
@@ -501,12 +536,12 @@ cdef bint distance_vertices(double center[8][3], double off[8][3], double r):
                 return 1
     return 0
 
-cdef void offset_cube(double center[8][3], long n, long m, long l, double (&offseted)[8][3]):
+cdef void offset_cube(double center[8][3], long n, long m, long l, double (&offsetted)[8][3]):
     cdef int i, j, k
     for i in range(2):
         for j in range(2):
             for k in range(2):
                 ind = i * 4 + j * 2 + k
-                offseted[ind][0] = center[ind][0] + n
-                offseted[ind][1] = center[ind][1] + m
-                offseted[ind][2] = center[ind][2] + l
+                offsetted[ind][0] = center[ind][0] + n
+                offsetted[ind][1] = center[ind][1] + m
+                offsetted[ind][2] = center[ind][2] + l

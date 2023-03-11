@@ -1,7 +1,5 @@
-# coding: utf-8
 # Copyright (c) Pymatgen Development Team.
 # Distributed under the terms of the MIT License.
-
 
 """
 This module contains an algorithm to solve the Linear Assignment Problem.
@@ -9,14 +7,16 @@ It has the same functionality as linear_assignment.pyx, but is much slower
 as it is vectorized in numpy rather than cython
 """
 
+from __future__ import annotations
+
+import numpy as np
+
 __author__ = "Will Richards"
 __copyright__ = "Copyright 2011, The Materials Project"
 __version__ = "1.0"
 __maintainer__ = "Will Richards"
 __email__ = "wrichards@mit.edu"
 __date__ = "Jan 28, 2013"
-
-import numpy as np
 
 
 class LinearAssignment:
@@ -30,12 +30,6 @@ class LinearAssignment:
     Dense and Sparse Linear Assignment Problems. Computing 38, 325-340
     (1987)
 
-    Args:
-        costs: The cost matrix of the problem. cost[i,j] should be the
-            cost of matching x[i] to y[j]. The cost matrix may be
-            rectangular
-        epsilon: Tolerance for determining if solution vector is < 0
-
     .. attribute: min_cost:
 
         The minimum cost of the matching
@@ -48,7 +42,14 @@ class LinearAssignment:
     """
 
     def __init__(self, costs, epsilon=1e-6):
-        self.orig_c = np.array(costs, dtype=np.float64)
+        """
+        Args:
+            costs: The cost matrix of the problem. cost[i,j] should be the
+                cost of matching x[i] to y[j]. The cost matrix may be
+                rectangular
+            epsilon: Tolerance for determining if solution vector is < 0
+        """
+        self.orig_c = np.array(costs, dtype=np.float_)
         self.nx, self.ny = self.orig_c.shape
         self.n = self.ny
         self._inds = np.arange(self.n)
@@ -68,10 +69,10 @@ class LinearAssignment:
             # is a safer choice. The fill value is not zero to avoid choosing the extra
             # rows in the initial column reduction step
             self.c = np.full((self.n, self.n), np.max(np.min(self.orig_c, axis=1)))
-            self.c[:self.nx] = self.orig_c
+            self.c[: self.nx] = self.orig_c
 
         # initialize solution vectors
-        self._x = np.zeros(self.n, dtype=np.int) - 1
+        self._x = np.zeros(self.n, dtype=np.int_) - 1
         self._y = self._x.copy()
 
         # if column reduction doesn't find a solution, augment with shortest
@@ -83,7 +84,7 @@ class LinearAssignment:
             while -1 in self._x:
                 self._augment()
 
-        self.solution = self._x[:self.nx]
+        self.solution = self._x[: self.nx]
         self._min_cost = None
 
     @property
@@ -195,7 +196,7 @@ class LinearAssignment:
 
         # compute distances
         self._d = self.c[istar] - self._v
-        _pred = np.zeros(self.n, dtype=np.int) + istar
+        _pred = np.zeros(self.n, dtype=np.int_) + istar
 
         # initialize sets
         # READY: set of nodes visited and in the path (whose price gets
@@ -203,9 +204,9 @@ class LinearAssignment:
         # SCAN: set of nodes at the bottom of the tree, which we need to
         # look at
         # T0DO: unvisited nodes
-        _ready = np.zeros(self.n, dtype=np.bool)
-        _scan = np.zeros(self.n, dtype=np.bool)
-        _todo = np.zeros(self.n, dtype=np.bool) + True
+        _ready = np.zeros(self.n, dtype=np.bool_)
+        _scan = np.zeros(self.n, dtype=np.bool_)
+        _todo = np.zeros(self.n, dtype=np.bool_) + True
 
         while True:
             # populate scan with minimum reduced distances

@@ -1,11 +1,10 @@
-# coding: utf-8
 # Copyright (c) Pymatgen Development Team.
 # Distributed under the terms of the MIT License.
 
 """
 This module define a WulffShape class to generate the Wulff shape from
 a lattice, a list of indices and their corresponding surface energies,
-and the total area and volume of the wulff shape,the weighted surface energy,
+and the total area and volume of the Wulff shape, the weighted surface energy,
 the anisotropy and shape_factor can also be calculated.
 In support of plotting from a given view in terms of miller index.
 
@@ -18,20 +17,27 @@ Tran, R.; Xu, Z.; Radhakrishnan, B.; Winston, D.; Persson, K. A.; Ong, S. P.
 (2016). Surface energies of elemental crystals. Scientific Data.
 """
 
-from pymatgen.core.structure import Structure
-from pymatgen.util.coord import get_angle
-import numpy as np
-import scipy as sp
-from scipy.spatial import ConvexHull
+from __future__ import annotations
+
+import itertools
 import logging
 import warnings
 
-__author__ = 'Zihan Xu, Richard Tran, Shyue Ping Ong'
-__copyright__ = 'Copyright 2013, The Materials Virtual Lab'
-__version__ = '0.1'
-__maintainer__ = 'Zihan Xu'
-__email__ = 'zix009@eng.ucsd.edu'
-__date__ = 'May 5 2016'
+import numpy as np
+import plotly.graph_objs as go
+from scipy.spatial import ConvexHull
+
+from pymatgen.core.lattice import Lattice
+from pymatgen.core.structure import Structure
+from pymatgen.util.coord import get_angle
+from pymatgen.util.string import unicodeify_spacegroup
+
+__author__ = "Zihan Xu, Richard Tran, Shyue Ping Ong"
+__copyright__ = "Copyright 2013, The Materials Virtual Lab"
+__version__ = "0.1"
+__maintainer__ = "Zihan Xu"
+__email__ = "zix009@eng.ucsd.edu"
+__date__ = "May 5 2016"
 
 logger = logging.getLogger(__name__)
 
@@ -43,13 +49,13 @@ def hkl_tuple_to_str(hkl):
     Agrs:
         hkl: in the form of [h, k, l] or (h, k, l)
     """
-    str_format = '($'
+    str_format = "($"
     for x in hkl:
         if x < 0:
-            str_format += '\\overline{' + str(-x) + '}'
+            str_format += "\\overline{" + str(-x) + "}"
         else:
             str_format += str(x)
-    str_format += '$)'
+    str_format += "$)"
     return str_format
 
 
@@ -64,7 +70,7 @@ def get_tri_area(pts):
     a, b, c = pts[0], pts[1], pts[2]
     v1 = np.array(b) - np.array(a)
     v2 = np.array(c) - np.array(a)
-    area_tri = abs(sp.linalg.norm(sp.cross(v1, v2)) / 2)
+    area_tri = abs(np.linalg.norm(np.cross(v1, v2)) / 2)
     return area_tri
 
 
@@ -73,8 +79,7 @@ class WulffFacet:
     Helper container for each Wulff plane.
     """
 
-    def __init__(self, normal, e_surf, normal_pt, dual_pt, index, m_ind_orig,
-                 miller):
+    def __init__(self, normal, e_surf, normal_pt, dual_pt, index, m_ind_orig, miller):
         """
         :param normal:
         :param e_surf:
@@ -163,7 +168,7 @@ class WulffShape:
 
     """
 
-    def __init__(self, lattice, miller_list, e_surf_list, symprec=1e-5):
+    def __init__(self, lattice: Lattice, miller_list, e_surf_list, symprec=1e-5):
         """
         Args:
             lattice: Lattice object of the conventional unit cell
@@ -171,8 +176,7 @@ class WulffShape:
             e_surf_list ([float]): list of corresponding surface energies
             symprec (float): for recp_operation, default is 1e-5.
         """
-
-        if any([se < 0 for se in e_surf_list]):
+        if any(se < 0 for se in e_surf_list):
             warnings.warn("Unphysical (negative) surface energy detected.")
 
         self.color_ind = list(range(len(miller_list)))
@@ -180,8 +184,8 @@ class WulffShape:
         self.input_miller_fig = [hkl_tuple_to_str(x) for x in miller_list]
         # store input data
         self.structure = Structure(lattice, ["H"], [[0, 0, 0]])
-        self.miller_list = tuple([tuple(x) for x in miller_list])
-        self.hkl_list = tuple([(x[0], x[1], x[-1]) for x in miller_list])
+        self.miller_list = tuple(tuple(x) for x in miller_list)
+        self.hkl_list = tuple((x[0], x[1], x[-1]) for x in miller_list)
         self.e_surf_list = tuple(e_surf_list)
         self.lattice = lattice
         self.symprec = symprec
@@ -198,15 +202,14 @@ class WulffShape:
         # simplices	(ndarray of ints, shape (nfacet, ndim))
         # list of [i, j, k] , ndim = 3
         # i, j, k: ind for normal_e_m
-        # recalculate the dual of dual, get the wulff shape.
-        # conner <-> surface
+        # recalculate the dual of dual, get the Wulff shape.
+        # corner <-> surface
         # get cross point from the simplices of the dual convex hull
-        wulff_pt_list = [self._get_cross_pt_dual_simp(dual_simp)
-                         for dual_simp in dual_cv_simp]
+        wulff_pt_list = [self._get_cross_pt_dual_simp(dual_simp) for dual_simp in dual_cv_simp]
 
         wulff_convex = ConvexHull(wulff_pt_list)
         wulff_cv_simp = wulff_convex.simplices
-        logger.debug(", ".join([str(len(x)) for x in wulff_cv_simp]))
+        logger.debug(", ".join(str(len(x)) for x in wulff_cv_simp))
 
         # store simplices and convex
         self.dual_cv_simp = dual_cv_simp
@@ -218,21 +221,17 @@ class WulffShape:
 
         miller_area = []
         for m, in_mill_fig in enumerate(self.input_miller_fig):
-            miller_area.append(
-                in_mill_fig + ' : ' + str(round(self.color_area[m], 4)))
+            miller_area.append(in_mill_fig + " : " + str(round(self.color_area[m], 4)))
         self.miller_area = miller_area
 
     def _get_all_miller_e(self):
         """
-        from self:
-            get miller_list(unique_miller), e_surf_list and symmetry
-            operations(symmops) according to lattice
-        apply symmops to get all the miller index, then get normal,
-        get all the facets functions for wulff shape calculation:
-            |normal| = 1, e_surf is plane's distance to (0, 0, 0),
-            normal[0]x + normal[1]y + normal[2]z = e_surf
+        From self: get miller_list(unique_miller), e_surf_list and symmetry operations(symmops)
+        according to lattice apply symmops to get all the miller index, then get normal, get
+        all the facets functions for Wulff shape calculation: |normal| = 1, e_surf is plane's
+        distance to (0, 0, 0), normal[0]x + normal[1]y + normal[2]z = e_surf
 
-        return:
+        Returns:
             [WulffFacet]
         """
         all_hkl = []
@@ -241,19 +240,17 @@ class WulffShape:
         recp = self.structure.lattice.reciprocal_lattice_crystallographic
         recp_symmops = self.lattice.get_recp_symmetry_operation(self.symprec)
 
-        for i, (hkl, energy) in enumerate(zip(self.hkl_list,
-                                              self.e_surf_list)):
+        for i, (hkl, energy) in enumerate(zip(self.hkl_list, self.e_surf_list)):
             for op in recp_symmops:
-                miller = tuple([int(x) for x in op.operate(hkl)])
+                miller = tuple(int(x) for x in op.operate(hkl))
                 if miller not in all_hkl:
                     all_hkl.append(miller)
                     normal = recp.get_cartesian_coords(miller)
-                    normal /= sp.linalg.norm(normal)
+                    normal /= np.linalg.norm(normal)
                     normal_pt = [x * energy for x in normal]
                     dual_pt = [x / energy for x in normal]
                     color_plane = color_ind[divmod(i, len(color_ind))[1]]
-                    planes.append(WulffFacet(normal, energy, normal_pt,
-                                             dual_pt, color_plane, i, hkl))
+                    planes.append(WulffFacet(normal, energy, normal_pt, dual_pt, color_plane, i, hkl))
 
         # sort by e_surf
         planes.sort(key=lambda x: x.e_surf)
@@ -272,7 +269,7 @@ class WulffShape:
         """
         matrix_surfs = [self.facets[dual_simp[i]].normal for i in range(3)]
         matrix_e = [self.facets[dual_simp[i]].e_surf for i in range(3)]
-        cross_pt = sp.dot(sp.linalg.inv(matrix_surfs), matrix_e)
+        cross_pt = np.dot(np.linalg.inv(matrix_surfs), matrix_e)
         return cross_pt
 
     def _get_simpx_plane(self):
@@ -300,54 +297,57 @@ class WulffShape:
                     break
         for plane in self.facets:
             plane.outer_lines.sort()
-            plane.outer_lines = [line for line in plane.outer_lines
-                                 if plane.outer_lines.count(line) != 2]
+            plane.outer_lines = [line for line in plane.outer_lines if plane.outer_lines.count(line) != 2]
         return on_wulff, surface_area
 
-    def _get_colors(self, color_set, alpha, off_color, custom_colors={}):
+    def _get_colors(self, color_set, alpha, off_color, custom_colors=None):
         """
-        assign colors according to the surface energies of on_wulff facets.
+        Assign colors according to the surface energies of on_wulff facets.
 
-        return:
-            (color_list, color_proxy, color_proxy_on_wulff, miller_on_wulff,
-            e_surf_on_wulff_list)
+        Returns:
+            tuple: color_list, color_proxy, color_proxy_on_wulff, miller_on_wulff,
+            e_surf_on_wulff_list
         """
         import matplotlib as mpl
         import matplotlib.pyplot as plt
+
         color_list = [off_color] * len(self.hkl_list)
         color_proxy_on_wulff = []
         miller_on_wulff = []
-        e_surf_on_wulff = [(i, e_surf)
-                           for i, e_surf in enumerate(self.e_surf_list)
-                           if self.on_wulff[i]]
+        e_surf_on_wulff = [(i, e_surf) for i, e_surf in enumerate(self.e_surf_list) if self.on_wulff[i]]
 
         c_map = plt.get_cmap(color_set)
         e_surf_on_wulff.sort(key=lambda x: x[1], reverse=False)
         e_surf_on_wulff_list = [x[1] for x in e_surf_on_wulff]
         if len(e_surf_on_wulff) > 1:
-            cnorm = mpl.colors.Normalize(vmin=min(e_surf_on_wulff_list),
-                                         vmax=max(e_surf_on_wulff_list))
+            cnorm = mpl.colors.Normalize(vmin=min(e_surf_on_wulff_list), vmax=max(e_surf_on_wulff_list))
         else:
             # if there is only one hkl on wulff, choose the color of the median
-            cnorm = mpl.colors.Normalize(vmin=min(e_surf_on_wulff_list) - 0.1,
-                                         vmax=max(e_surf_on_wulff_list) + 0.1)
+            cnorm = mpl.colors.Normalize(
+                vmin=min(e_surf_on_wulff_list) - 0.1,
+                vmax=max(e_surf_on_wulff_list) + 0.1,
+            )
         scalar_map = mpl.cm.ScalarMappable(norm=cnorm, cmap=c_map)
 
         for i, e_surf in e_surf_on_wulff:
             color_list[i] = scalar_map.to_rgba(e_surf, alpha=alpha)
-            if tuple(self.miller_list[i]) in custom_colors.keys():
+            if tuple(self.miller_list[i]) in custom_colors:
                 color_list[i] = custom_colors[tuple(self.miller_list[i])]
-            color_proxy_on_wulff.append(
-                plt.Rectangle((2, 2), 1, 1, fc=color_list[i], alpha=alpha))
+            color_proxy_on_wulff.append(plt.Rectangle((2, 2), 1, 1, fc=color_list[i], alpha=alpha))
             miller_on_wulff.append(self.input_miller_fig[i])
         scalar_map.set_array([x[1] for x in e_surf_on_wulff])
-        color_proxy = [plt.Rectangle((2, 2), 1, 1, fc=x, alpha=alpha)
-                       for x in color_list]
+        color_proxy = [plt.Rectangle((2, 2), 1, 1, fc=x, alpha=alpha) for x in color_list]
 
-        return color_list, color_proxy, color_proxy_on_wulff, miller_on_wulff, e_surf_on_wulff_list
+        return (
+            color_list,
+            color_proxy,
+            color_proxy_on_wulff,
+            miller_on_wulff,
+            e_surf_on_wulff_list,
+        )
 
     def show(self, *args, **kwargs):
-        r"""
+        """
         Show the Wulff plot.
 
         Args:
@@ -360,39 +360,50 @@ class WulffShape:
         """
         Returns the sorted pts in a facet used to draw a line
         """
-
         lines = list(facet.outer_lines)
         pt = []
         prev = None
         while len(lines) > 0:
             if prev is None:
-                l = lines.pop(0)
+                line = lines.pop(0)
             else:
-                for i, l in enumerate(lines):
-                    if prev in l:
-                        l = lines.pop(i)
-                        if l[1] == prev:
-                            l.reverse()
+                for i, line in enumerate(lines):
+                    if prev in line:
+                        line = lines.pop(i)
+                        if line[1] == prev:
+                            line.reverse()
                         break
             # make sure the lines are connected one by one.
             # find the way covering all pts and facets
-            pt.append(self.wulff_pt_list[l[0]].tolist())
-            pt.append(self.wulff_pt_list[l[1]].tolist())
-            prev = l[1]
+            pt.append(self.wulff_pt_list[line[0]].tolist())
+            pt.append(self.wulff_pt_list[line[1]].tolist())
+            prev = line[1]
 
         return pt
 
-    def get_plot(self, color_set='PuBu', grid_off=True, axis_off=True,
-                 show_area=False, alpha=1, off_color='red', direction=None,
-                 bar_pos=(0.75, 0.15, 0.05, 0.65), bar_on=False, units_in_JPERM2=True,
-                 legend_on=True, aspect_ratio=(8, 8), custom_colors={}):
+    def get_plot(
+        self,
+        color_set="PuBu",
+        grid_off=True,
+        axis_off=True,
+        show_area=False,
+        alpha=1,
+        off_color="red",
+        direction=None,
+        bar_pos=(0.75, 0.15, 0.05, 0.65),
+        bar_on=False,
+        units_in_JPERM2=True,
+        legend_on=True,
+        aspect_ratio=(8, 8),
+        custom_colors=None,
+    ):
         """
         Get the Wulff shape plot.
 
         Args:
             color_set: default is 'PuBu'
             grid_off (bool): default is True
-            axis_off (bool): default is Ture
+            axis_off (bool): default is True
             show_area (bool): default is False
             alpha (float): chosen from 0 to 1 (float), default is 1
             off_color: Default color for facets not present on the Wulff shape.
@@ -406,6 +417,8 @@ class WulffShape:
                 index and value is the color. Undefined facets will use default
                 color site. Note: If you decide to set your own colors, it
                 probably won't make any sense to have the color bar on.
+            units_in_JPERM2 (bool): Units of surface energy, defaults to
+                Joules per square meter (True)
 
         Return:
             (matplotlib.pyplot)
@@ -413,19 +426,19 @@ class WulffShape:
         import matplotlib as mpl
         import matplotlib.pyplot as plt
         import mpl_toolkits.mplot3d as mpl3
+
         color_list, color_proxy, color_proxy_on_wulff, miller_on_wulff, e_surf_on_wulff = self._get_colors(
-            color_set, alpha, off_color, custom_colors=custom_colors)
+            color_set, alpha, off_color, custom_colors=custom_colors or {}
+        )
 
         if not direction:
             # If direction is not specified, use the miller indices of
             # maximum area.
-            direction = max(self.area_fraction_dict.items(),
-                            key=lambda x: x[1])[0]
+            direction = max(self.area_fraction_dict.items(), key=lambda x: x[1])[0]
 
         fig = plt.figure()
         fig.set_size_inches(aspect_ratio[0], aspect_ratio[1])
-        azim, elev = self._get_azimuth_elev([direction[0], direction[1],
-                                             direction[-1]])
+        azim, elev = self._get_azimuth_elev([direction[0], direction[1], direction[-1]])
 
         wulff_pt_list = self.wulff_pt_list
 
@@ -449,47 +462,198 @@ class WulffShape:
         # set ranges of x, y, z
         # find the largest distance between on_wulff pts and the origin,
         # to ensure complete and consistent display for all directions
-        r_range = max([np.linalg.norm(x) for x in wulff_pt_list])
+        r_range = max(np.linalg.norm(x) for x in wulff_pt_list)
         ax.set_xlim([-r_range * 1.1, r_range * 1.1])
         ax.set_ylim([-r_range * 1.1, r_range * 1.1])
-        ax.set_zlim([-r_range * 1.1, r_range * 1.1])
+        ax.set_zlim([-r_range * 1.1, r_range * 1.1])  # pylint: disable=E1101
         # add legend
         if legend_on:
             color_proxy = color_proxy
             if show_area:
-                ax.legend(color_proxy, self.miller_area, loc='upper left',
-                          bbox_to_anchor=(0, 1), fancybox=True, shadow=False)
+                ax.legend(
+                    color_proxy,
+                    self.miller_area,
+                    loc="upper left",
+                    bbox_to_anchor=(0, 1),
+                    fancybox=True,
+                    shadow=False,
+                )
             else:
-                ax.legend(color_proxy_on_wulff, miller_on_wulff,
-                          loc='upper center',
-                          bbox_to_anchor=(0.5, 1), ncol=3, fancybox=True,
-                          shadow=False)
-        ax.set_xlabel('x')
-        ax.set_ylabel('y')
-        ax.set_zlabel('z')
+                ax.legend(
+                    color_proxy_on_wulff,
+                    miller_on_wulff,
+                    loc="upper center",
+                    bbox_to_anchor=(0.5, 1),
+                    ncol=3,
+                    fancybox=True,
+                    shadow=False,
+                )
+        ax.set_xlabel("x")
+        ax.set_ylabel("y")
+        ax.set_zlabel("z")
 
         # Add colorbar
         if bar_on:
             cmap = plt.get_cmap(color_set)
-            cmap.set_over('0.25')
-            cmap.set_under('0.75')
+            cmap.set_over("0.25")
+            cmap.set_under("0.75")
             bounds = [round(e, 2) for e in e_surf_on_wulff]
             bounds.append(1.2 * bounds[-1])
             norm = mpl.colors.BoundaryNorm(bounds, cmap.N)
             # display surface energies
             ax1 = fig.add_axes(bar_pos)
             cbar = mpl.colorbar.ColorbarBase(
-                ax1, cmap=cmap, norm=norm, boundaries=[0] + bounds + [10],
-                extend='both', ticks=bounds[:-1], spacing='proportional',
-                orientation='vertical')
+                ax1,
+                cmap=cmap,
+                norm=norm,
+                boundaries=[0, *bounds] + [10],
+                extend="both",
+                ticks=bounds[:-1],
+                spacing="proportional",
+                orientation="vertical",
+            )
             units = "$J/m^2$" if units_in_JPERM2 else r"$eV/\AA^2$"
-            cbar.set_label('Surface Energies (%s)' % (units), fontsize=100)
+            cbar.set_label(f"Surface Energies ({units})", fontsize=25)
 
         if grid_off:
-            ax.grid('off')
+            ax.grid("off")
         if axis_off:
-            ax.axis('off')
+            ax.axis("off")
         return plt
+
+    def get_plotly(
+        self,
+        color_set="PuBu",
+        off_color="red",
+        alpha=1,
+        custom_colors=None,
+        units_in_JPERM2=True,
+    ):
+        """
+        Get the Wulff shape as a plotly Figure object.
+
+        Args:
+            color_set: default is 'PuBu'
+            alpha (float): chosen from 0 to 1 (float), default is 1
+            off_color: Default color for facets not present on the Wulff shape.
+            custom_colors ({(h,k,l}: [r,g,b,alpha}): Customize color of each
+                facet with a dictionary. The key is the corresponding Miller
+                index and value is the color. Undefined facets will use default
+                color site. Note: If you decide to set your own colors, it
+                probably won't make any sense to have the color bar on.
+            units_in_JPERM2 (bool): Units of surface energy, defaults to
+                Joules per square meter (True)
+
+        Return:
+            (plotly.graph_objs.Figure)
+        """
+        units = "Jm⁻²" if units_in_JPERM2 else "eVÅ⁻²"
+        (
+            color_list,
+            color_proxy,
+            color_proxy_on_wulff,
+            miller_on_wulff,
+            e_surf_on_wulff,
+        ) = self._get_colors(color_set, alpha, off_color, custom_colors=custom_colors or {})
+
+        planes_data, color_scale, ticktext, tickvals = [], [], [], []
+        for plane in self.facets:
+            if len(plane.points) < 1:
+                # empty, plane is not on_wulff.
+                continue
+
+            plane_color = color_list[plane.index]
+            plane_color = (1, 0, 0, 1) if plane_color == off_color else plane_color  # set to red for now
+
+            pt = self.get_line_in_facet(plane)
+            x_pts, y_pts, z_pts = [], [], []
+            for p in pt:
+                x_pts.append(p[0])
+                y_pts.append(p[1])
+                z_pts.append(p[2])
+
+            # remove duplicate x y z pts to save time
+            all_xyz = []
+            # pylint: disable=E1133,E1136
+            [all_xyz.append(list(coord)) for coord in np.array([x_pts, y_pts, z_pts]).T if list(coord) not in all_xyz]
+            all_xyz = np.array(all_xyz).T
+            x_pts, y_pts, z_pts = all_xyz[0], all_xyz[1], all_xyz[2]
+            index_list = [int(i) for i in np.linspace(0, len(x_pts) - 1, len(x_pts))]
+
+            tri_indices = np.array(list(itertools.combinations(index_list, 3))).T
+            hkl = self.miller_list[plane.index]
+            hkl = unicodeify_spacegroup("(" + "%s" * len(hkl) % hkl + ")")
+            cs = tuple(np.array(plane_color) * 255)
+            color = f"rgba({cs[0]:.5f}, {cs[1]:.5f}, {cs[2]:.5f}, {cs[3]:.5f})"
+
+            # note hoverinfo is incompatible with latex, need unicode instead
+            planes_data.append(
+                go.Mesh3d(
+                    x=x_pts,
+                    y=y_pts,
+                    z=z_pts,
+                    i=tri_indices[0],
+                    j=tri_indices[1],
+                    k=tri_indices[2],
+                    hovertemplate=f"<br>%{{text}}<br>y={plane.e_surf:.3f} {units}<br>",
+                    color=color,
+                    text=[f"Miller index: {hkl}"] * len(x_pts),
+                    hoverinfo="name",
+                    name="",
+                )
+            )
+
+            # normalize surface energy from a scale of 0 to 1 for colorbar
+            norm_e = (plane.e_surf - min(e_surf_on_wulff)) / (max(e_surf_on_wulff) - min(e_surf_on_wulff))
+            c = [norm_e, color]
+            if c not in color_scale:
+                color_scale.append(c)
+                ticktext.append(f"{plane.e_surf:.3f}")
+                tickvals.append(norm_e)
+
+        # Add colorbar
+        color_scale = sorted(color_scale, key=lambda c: c[0])
+        colorbar = go.Mesh3d(
+            x=[0],
+            y=[0],
+            z=[0],
+            colorbar=go.ColorBar(
+                title={
+                    "text": f"Surface energy {units}",
+                    "side": "right",
+                    "font": {"size": 25},
+                },
+                ticktext=ticktext,
+                tickvals=tickvals,
+            ),
+            colorscale=[[0, "rgb(255,255,255, 255)"], *color_scale],  # fix the scale
+            intensity=[0, 0.33, 0.66, 1],
+            i=[0],
+            j=[0],
+            k=[0],
+            name="y",
+            showscale=True,
+        )
+        planes_data.append(colorbar)
+
+        # Format aesthetics: background, axis, etc.
+        axis_dict = {
+            "title": "",
+            "autorange": True,
+            "showgrid": False,
+            "zeroline": False,
+            "ticks": "",
+            "showline": False,
+            "showticklabels": False,
+            "showbackground": False,
+        }
+        fig = go.Figure(data=planes_data)
+        fig.layout.update(
+            showlegend=True,
+            scene={"xaxis": axis_dict, "yaxis": axis_dict, "zaxis": axis_dict},
+        )
+
+        return fig
 
     def _get_azimuth_elev(self, miller_index):
         """
@@ -499,14 +663,13 @@ class WulffShape:
         Returns:
             azim, elev for plotting
         """
-        if miller_index == (0, 0, 1) or miller_index == (0, 0, 0, 1):
+        if miller_index in [(0, 0, 1), (0, 0, 0, 1)]:
             return 0, 90
-        else:
-            cart = self.lattice.get_cartesian_coords(miller_index)
-            azim = get_angle([cart[0], cart[1], 0], (1, 0, 0))
-            v = [cart[0], cart[1], 0]
-            elev = get_angle(cart, v)
-            return azim, elev
+        cart = self.lattice.get_cartesian_coords(miller_index)
+        azim = get_angle([cart[0], cart[1], 0], (1, 0, 0))
+        v = [cart[0], cart[1], 0]
+        elev = get_angle(cart, v)
+        return azim, elev
 
     @property
     def volume(self):
@@ -550,8 +713,7 @@ class WulffShape:
         Returns:
             (dict): {hkl: area_hkl/total area on wulff}
         """
-        return {hkl: self.miller_area_dict[hkl] / self.surface_area
-                for hkl in self.miller_area_dict.keys()}
+        return {hkl: area / self.surface_area for hkl, area in self.miller_area_dict.items()}
 
     @property
     def anisotropy(self):
@@ -565,9 +727,8 @@ class WulffShape:
         area_frac_dict = self.area_fraction_dict
         miller_energy_dict = self.miller_energy_dict
 
-        for hkl in miller_energy_dict.keys():
-            square_diff_energy += (miller_energy_dict[hkl] - weighted_energy) \
-                                  ** 2 * area_frac_dict[hkl]
+        for hkl, energy in miller_energy_dict.items():
+            square_diff_energy += (energy - weighted_energy) ** 2 * area_frac_dict[hkl]
         return np.sqrt(square_diff_energy) / weighted_energy
 
     @property
@@ -603,9 +764,8 @@ class WulffShape:
             (float) sum(surface_energy_hkl * area_hkl)
         """
         tot_surface_energy = 0
-        for hkl in self.miller_energy_dict.keys():
-            tot_surface_energy += self.miller_energy_dict[hkl] * \
-                                  self.miller_area_dict[hkl]
+        for hkl, energy in self.miller_energy_dict.items():
+            tot_surface_energy += energy * self.miller_area_dict[hkl]
         return tot_surface_energy
 
     @property
@@ -628,12 +788,12 @@ class WulffShape:
             pt = self.get_line_in_facet(facet)
 
             lines = []
-            for i, p in enumerate(pt):
-                if i == len(pt) / 2:
+            for idx, _ in enumerate(pt):
+                if idx == len(pt) / 2:
                     break
-                lines.append(tuple(sorted(tuple([tuple(pt[i * 2]), tuple(pt[i * 2 + 1])]))))
+                lines.append(tuple(sorted((tuple(pt[idx * 2]), tuple(pt[idx * 2 + 1])))))
 
-            for i, p in enumerate(lines):
+            for p in lines:
                 if p not in all_edges:
                     edges.append(p)
 

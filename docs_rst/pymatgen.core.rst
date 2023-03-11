@@ -5,15 +5,18 @@ Subpackages
 -----------
 
 .. toctree::
+   :maxdepth: 7
 
 
 Submodules
 ----------
 
 .. toctree::
+   :maxdepth: 7
 
    pymatgen.core.bonds
    pymatgen.core.composition
+   pymatgen.core.interface
    pymatgen.core.ion
    pymatgen.core.lattice
    pymatgen.core.libxcfunc

@@ -1,48 +1,120 @@
-
 <!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
 
-<html xmlns="http://www.w3.org/1999/xhtml">
-  <head>
-    <meta charset="utf-8" />
-    <title>pymatgen.analysis.dimensionality module &#8212; pymatgen 2019.11.11 documentation</title>
-    <link rel="stylesheet" href="_static/proBlue.css" type="text/css" />
-    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
-    <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
-    <script type="text/javascript" src="_static/jquery.js"></script>
-    <script type="text/javascript" src="_static/underscore.js"></script>
-    <script type="text/javascript" src="_static/doctools.js"></script>
-    <script type="text/javascript" src="_static/language_data.js"></script>
-    <script async="async" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>pymatgen.analysis.dimensionality module &mdash; pymatgen 2023.3.10 documentation</title>
+      <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="_static/css/custom.css" type="text/css" />
+    <link rel="canonical" href="https://pymatgen.orgpymatgen.analysis.dimensionality.html"/>
+  <!--[if lt IE 9]>
+    <script src="_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
+        <script src="_static/doctools.js"></script>
+        <script src="_static/sphinx_highlight.js"></script>
+    <script src="_static/js/theme.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="pymatgen.analysis.disorder module" href="pymatgen.analysis.disorder.html" />
+    <link rel="prev" title="pymatgen.analysis.cost module" href="pymatgen.analysis.cost.html" />
  
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.1/jquery.min.js"></script>
 <script type="text/javascript">
   var _gaq = _gaq || [];
   _gaq.push(['_setAccount', 'UA-33990148-1']);
   _gaq.push(['_trackPageview']);
 </script>
 
-  </head><body>
-    <div class="related" role="navigation" aria-label="related navigation">
-      <h3>Navigation</h3>
-      <ul>
-        <li class="right" style="margin-right: 10px">
-          <a href="genindex.html" title="General Index"
-             accesskey="I">index</a></li>
-        <li class="right" >
-          <a href="py-modindex.html" title="Python Module Index"
-             >modules</a> |</li>
-        <li class="nav-item nav-item-0"><a href="index.html">pymatgen 2019.11.11 documentation</a> &#187;</li> 
-      </ul>
-    </div>  
+</head>
 
-    <div class="document">
-      <div class="documentwrapper">
-        <div class="bodywrapper">
-          <div class="body" role="main">
-            
-  <div class="section" id="module-pymatgen.analysis.dimensionality">
-<span id="pymatgen-analysis-dimensionality-module"></span><h1>pymatgen.analysis.dimensionality module<a class="headerlink" href="#module-pymatgen.analysis.dimensionality" title="Permalink to this headline">¶</a></h1>
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search"  style="background: linear-gradient(0deg, rgba(23,63,162,1) 0%, rgba(0,70,192,1) 100%)" >
+            <a href="index.html" class="icon icon-home"> pymatgen
+          </a>
+              <div class="version">
+                2023.3.10
+              </div>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="introduction.html">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="change_log.html">Change log</a></li>
+<li class="toctree-l1"><a class="reference internal" href="compatibility.html">Compatibility</a></li>
+<li class="toctree-l1"><a class="reference internal" href="contributing.html">Contributing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="usage.html">Usage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="team.html">Development Team</a></li>
+<li class="toctree-l1"><a class="reference internal" href="references.html">References</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="modules.html">API Docs</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="pymatgen.html">pymatgen namespace</a><ul class="current">
+<li class="toctree-l3 current"><a class="reference internal" href="pymatgen.html#subpackages">Subpackages</a><ul class="current">
+<li class="toctree-l4"><a class="reference internal" href="pymatgen.alchemy.html">pymatgen.alchemy package</a></li>
+<li class="toctree-l4 current"><a class="reference internal" href="pymatgen.analysis.html">pymatgen.analysis namespace</a></li>
+<li class="toctree-l4"><a class="reference internal" href="pymatgen.apps.html">pymatgen.apps package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="pymatgen.cli.html">pymatgen.cli package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="pymatgen.command_line.html">pymatgen.command_line package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="pymatgen.core.html">pymatgen.core package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="pymatgen.electronic_structure.html">pymatgen.electronic_structure package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="pymatgen.entries.html">pymatgen.entries package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="pymatgen.ext.html">pymatgen.ext namespace</a></li>
+<li class="toctree-l4"><a class="reference internal" href="pymatgen.io.html">pymatgen.io namespace</a></li>
+<li class="toctree-l4"><a class="reference internal" href="pymatgen.optimization.html">pymatgen.optimization package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="pymatgen.phonon.html">pymatgen.phonon package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="pymatgen.symmetry.html">pymatgen.symmetry package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="pymatgen.transformations.html">pymatgen.transformations package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="pymatgen.util.html">pymatgen.util package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="pymatgen.vis.html">pymatgen.vis package</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="pymatgen.html#submodules">Submodules</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu"  style="background: linear-gradient(0deg, rgba(23,63,162,1) 0%, rgba(0,70,192,1) 100%)" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">pymatgen</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content style-external-links">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="index.html" class="icon icon-home"></a> &raquo;</li>
+          <li><a href="modules.html">pymatgen</a> &raquo;</li>
+          <li><a href="pymatgen.html">pymatgen namespace</a> &raquo;</li>
+          <li><a href="pymatgen.analysis.html">pymatgen.analysis namespace</a> &raquo;</li>
+      <li>pymatgen.analysis.dimensionality module</li>
+      <li class="wy-breadcrumbs-aside">
+              <a href="https://github.com/materialsproject/pymatgen/blob/master/docs_rst/pymatgen.analysis.dimensionality.rst" class="fa fa-github"> Edit on GitHub</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="module-pymatgen.analysis.dimensionality">
+<span id="pymatgen-analysis-dimensionality-module"></span><h1>pymatgen.analysis.dimensionality module<a class="headerlink" href="#module-pymatgen.analysis.dimensionality" title="Permalink to this heading"></a></h1>
 <p>This module provides functions to get the dimensionality of a structure.</p>
 <p>A number of different algorithms are implemented. These are based on the
 following publications:</p>
@@ -66,9 +138,9 @@ J. Mater. Chem. A 2, 4136 (2016).</p></li>
 </ul>
 </dd>
 </dl>
-<dl class="function">
-<dt id="pymatgen.analysis.dimensionality.calculate_dimensionality_of_site">
-<code class="sig-name descname">calculate_dimensionality_of_site</code><span class="sig-paren">(</span><em class="sig-param">bonded_structure</em>, <em class="sig-param">site_index</em>, <em class="sig-param">inc_vertices=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pymatgen/analysis/dimensionality.html#calculate_dimensionality_of_site"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pymatgen.analysis.dimensionality.calculate_dimensionality_of_site" title="Permalink to this definition">¶</a></dt>
+<dl class="py function">
+<dt class="sig sig-object py" id="pymatgen.analysis.dimensionality.calculate_dimensionality_of_site">
+<span class="sig-name descname"><span class="pre">calculate_dimensionality_of_site</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">bonded_structure</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">site_index</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">inc_vertices</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/materialsproject/pymatgen/blob/v2023.3.10/pymatgen/core/../analysis/dimensionality.py#L171-L245"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pymatgen.analysis.dimensionality.calculate_dimensionality_of_site" title="Permalink to this definition"></a></dt>
 <dd><p>Calculates the dimensionality of the component containing the given site.</p>
 <p>Implements directly the modified breadth-first-search algorithm described in
 Algorithm 1 of:</p>
@@ -76,7 +148,7 @@ Algorithm 1 of:</p>
 scoring parameter to identify low-dimensional materials components.
 Phys. Rev. Materials 3, 034003 (2019).</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>bonded_structure</strong> (<a class="reference internal" href="pymatgen.analysis.graphs.html#pymatgen.analysis.graphs.StructureGraph" title="pymatgen.analysis.graphs.StructureGraph"><em>StructureGraph</em></a>) – A structure with bonds, represented
 as a pymatgen structure graph. For example, generated using the
@@ -86,21 +158,21 @@ CrystalNN.get_bonded_structure() method.</p></li>
 images) of the component.</p></li>
 </ul>
 </dd>
-<dt class="field-even">Returns</dt>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p>If inc_vertices is False, the dimensionality of the
 component will be returned as an int. If inc_vertices is true, the
 function will return a tuple of (dimensionality, vertices), where
 vertices is a list of tuples. E.g. [(0, 0, 0), (1, 1, 1)].</p>
 </dd>
-<dt class="field-odd">Return type</dt>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p>(int or tuple)</p>
 </dd>
 </dl>
 </dd></dl>
 
-<dl class="function">
-<dt id="pymatgen.analysis.dimensionality.find_clusters">
-<code class="sig-name descname">find_clusters</code><span class="sig-paren">(</span><em class="sig-param">struct</em>, <em class="sig-param">connected_matrix</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pymatgen/analysis/dimensionality.html#find_clusters"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pymatgen.analysis.dimensionality.find_clusters" title="Permalink to this definition">¶</a></dt>
+<dl class="py function">
+<dt class="sig sig-object py" id="pymatgen.analysis.dimensionality.find_clusters">
+<span class="sig-name descname"><span class="pre">find_clusters</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">struct</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">connected_matrix</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/materialsproject/pymatgen/blob/v2023.3.10/pymatgen/core/../analysis/dimensionality.py#L439-L491"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pymatgen.analysis.dimensionality.find_clusters" title="Permalink to this definition"></a></dt>
 <dd><p>Finds bonded clusters of atoms in the structure with periodic boundary
 conditions.</p>
 <p>If there are atoms that are not bonded to anything, returns [0,1,0]. (For
@@ -108,33 +180,33 @@ faster computation time)</p>
 <p>Author: “Gowoon Cheon”
 Email: “<a class="reference external" href="mailto:gcheon&#37;&#52;&#48;stanford&#46;edu">gcheon<span>&#64;</span>stanford<span>&#46;</span>edu</a>”</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>struct</strong> (<a class="reference internal" href="pymatgen.core.structure.html#pymatgen.core.structure.Structure" title="pymatgen.core.structure.Structure"><em>Structure</em></a>) – Input structure</p></li>
 <li><p><strong>connected_matrix</strong> – Must be made from the same structure with
 find_connected_atoms() function.</p></li>
 </ul>
 </dd>
-<dt class="field-even">Returns</dt>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p>the size of the largest cluster in the crystal structure
 min_cluster: the size of the smallest cluster in the crystal structure
 clusters: list of bonded clusters found here, clusters are formatted as
 sets of indices of atoms</p>
 </dd>
-<dt class="field-odd">Return type</dt>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p>max_cluster</p>
 </dd>
 </dl>
 </dd></dl>
 
-<dl class="function">
-<dt id="pymatgen.analysis.dimensionality.find_connected_atoms">
-<code class="sig-name descname">find_connected_atoms</code><span class="sig-paren">(</span><em class="sig-param">struct</em>, <em class="sig-param">tolerance=0.45</em>, <em class="sig-param">ldict={'Ac': 1.88</em>, <em class="sig-param">'Ag': 1.59</em>, <em class="sig-param">'Al': 1.35</em>, <em class="sig-param">'Am': 1.51</em>, <em class="sig-param">'Ar': 1.57</em>, <em class="sig-param">'As': 1.21</em>, <em class="sig-param">'At': 1.7</em>, <em class="sig-param">'Au': 1.5</em>, <em class="sig-param">'B': 0.83</em>, <em class="sig-param">'Ba': 1.34</em>, <em class="sig-param">'Be': 0.35</em>, <em class="sig-param">'Bh': 1.6</em>, <em class="sig-param">'Bi': 1.54</em>, <em class="sig-param">'Bk': 1.5</em>, <em class="sig-param">'Br': 1.21</em>, <em class="sig-param">'C': 0.68</em>, <em class="sig-param">'Ca': 0.99</em>, <em class="sig-param">'Cd': 1.69</em>, <em class="sig-param">'Ce': 1.83</em>, <em class="sig-param">'Cf': 1.5</em>, <em class="sig-param">'Cl': 0.99</em>, <em class="sig-param">'Cm': 1.5</em>, <em class="sig-param">'Co': 1.33</em>, <em class="sig-param">'Cr': 1.35</em>, <em class="sig-param">'Cs': 1.67</em>, <em class="sig-param">'Cu': 1.52</em>, <em class="sig-param">'Db': 1.6</em>, <em class="sig-param">'Dy': 1.75</em>, <em class="sig-param">'Er': 1.73</em>, <em class="sig-param">'Es': 1.5</em>, <em class="sig-param">'Eu': 1.99</em>, <em class="sig-param">'F': 0.64</em>, <em class="sig-param">'Fe': 1.34</em>, <em class="sig-param">'Fm': 1.5</em>, <em class="sig-param">'Fr': 2</em>, <em class="sig-param">'Ga': 1.22</em>, <em class="sig-param">'Gd': 1.79</em>, <em class="sig-param">'Ge': 1.17</em>, <em class="sig-param">'H': 0.23</em>, <em class="sig-param">'He': 0.93</em>, <em class="sig-param">'Hf': 1.57</em>, <em class="sig-param">'Hg': 1.7</em>, <em class="sig-param">'Ho': 1.74</em>, <em class="sig-param">'Hs': 1.6</em>, <em class="sig-param">'I': 1.4</em>, <em class="sig-param">'In': 1.63</em>, <em class="sig-param">'Ir': 1.32</em>, <em class="sig-param">'K': 1.33</em>, <em class="sig-param">'Kr': 1.91</em>, <em class="sig-param">'La': 1.87</em>, <em class="sig-param">'Li': 0.68</em>, <em class="sig-param">'Lr': 1.5</em>, <em class="sig-param">'Lu': 1.72</em>, <em class="sig-param">'Md': 1.5</em>, <em class="sig-param">'Mg': 1.1</em>, <em class="sig-param">'Mn': 1.35</em>, <em class="sig-param">'Mo': 1.47</em>, <em class="sig-param">'Mt': 1.6</em>, <em class="sig-param">'N': 0.68</em>, <em class="sig-param">'Na': 0.97</em>, <em class="sig-param">'Nb': 1.48</em>, <em class="sig-param">'Nd': 1.81</em>, <em class="sig-param">'Ne': 1.12</em>, <em class="sig-param">'Ni': 1.5</em>, <em class="sig-param">'No': 1.5</em>, <em class="sig-param">'Np': 1.55</em>, <em class="sig-param">'O': 0.68</em>, <em class="sig-param">'Os': 1.37</em>, <em class="sig-param">'P': 0.75</em>, <em class="sig-param">'Pa': 1.61</em>, <em class="sig-param">'Pb': 1.54</em>, <em class="sig-param">'Pd': 1.5</em>, <em class="sig-param">'Pm': 1.8</em>, <em class="sig-param">'Po': 1.68</em>, <em class="sig-param">'Pr': 1.82</em>, <em class="sig-param">'Pt': 1.5</em>, <em class="sig-param">'Pu': 1.53</em>, <em class="sig-param">'Ra': 1.9</em>, <em class="sig-param">'Rb': 1.47</em>, <em class="sig-param">'Re': 1.35</em>, <em class="sig-param">'Rf': 1.6</em>, <em class="sig-param">'Rh': 1.45</em>, <em class="sig-param">'Rn': 2.4</em>, <em class="sig-param">'Ru': 1.4</em>, <em class="sig-param">'S': 1.02</em>, <em class="sig-param">'Sb': 1.46</em>, <em class="sig-param">'Sc': 1.44</em>, <em class="sig-param">'Se': 1.22</em>, <em class="sig-param">'Sg': 1.6</em>, <em class="sig-param">'Si': 1.2</em>, <em class="sig-param">'Sm': 1.8</em>, <em class="sig-param">'Sn': 1.46</em>, <em class="sig-param">'Sr': 1.12</em>, <em class="sig-param">'Ta': 1.43</em>, <em class="sig-param">'Tb': 1.76</em>, <em class="sig-param">'Tc': 1.35</em>, <em class="sig-param">'Te': 1.47</em>, <em class="sig-param">'Th': 1.79</em>, <em class="sig-param">'Ti': 1.47</em>, <em class="sig-param">'Tl': 1.55</em>, <em class="sig-param">'Tm': 1.72</em>, <em class="sig-param">'U': 1.58</em>, <em class="sig-param">'V': 1.33</em>, <em class="sig-param">'W': 1.37</em>, <em class="sig-param">'Xe': 1.98</em>, <em class="sig-param">'Y': 1.78</em>, <em class="sig-param">'Yb': 1.94</em>, <em class="sig-param">'Zn': 1.45</em>, <em class="sig-param">'Zr': 1.56}</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pymatgen/analysis/dimensionality.html#find_connected_atoms"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pymatgen.analysis.dimensionality.find_connected_atoms" title="Permalink to this definition">¶</a></dt>
+<dl class="py function">
+<dt class="sig sig-object py" id="pymatgen.analysis.dimensionality.find_connected_atoms">
+<span class="sig-name descname"><span class="pre">find_connected_atoms</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">struct</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tolerance</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.45</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ldict</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/materialsproject/pymatgen/blob/v2023.3.10/pymatgen/core/../analysis/dimensionality.py#L388-L436"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pymatgen.analysis.dimensionality.find_connected_atoms" title="Permalink to this definition"></a></dt>
 <dd><p>Finds bonded atoms and returns a adjacency matrix of bonded atoms.</p>
 <p>Author: “Gowoon Cheon”
 Email: “<a class="reference external" href="mailto:gcheon&#37;&#52;&#48;stanford&#46;edu">gcheon<span>&#64;</span>stanford<span>&#46;</span>edu</a>”</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>struct</strong> (<a class="reference internal" href="pymatgen.core.structure.html#pymatgen.core.structure.Structure" title="pymatgen.core.structure.Structure"><em>Structure</em></a>) – Input structure</p></li>
 <li><p><strong>tolerance</strong> – length in angstroms used in finding bonded atoms. Two atoms
@@ -145,20 +217,20 @@ value = 0.45, the value used by JMol and Cheon et al.</p></li>
 from JMol are used as default</p></li>
 </ul>
 </dd>
-<dt class="field-even">Returns</dt>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p>A numpy array of shape (number of atoms, number of atoms);
 If any image of atom j is bonded to atom i with periodic boundary
 conditions, the matrix element [atom i, atom j] is 1.</p>
 </dd>
-<dt class="field-odd">Return type</dt>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p>(np.ndarray)</p>
 </dd>
 </dl>
 </dd></dl>
 
-<dl class="function">
-<dt id="pymatgen.analysis.dimensionality.get_dimensionality_cheon">
-<code class="sig-name descname">get_dimensionality_cheon</code><span class="sig-paren">(</span><em class="sig-param">structure_raw</em>, <em class="sig-param">tolerance=0.45</em>, <em class="sig-param">ldict={'Ac': 1.88</em>, <em class="sig-param">'Ag': 1.59</em>, <em class="sig-param">'Al': 1.35</em>, <em class="sig-param">'Am': 1.51</em>, <em class="sig-param">'Ar': 1.57</em>, <em class="sig-param">'As': 1.21</em>, <em class="sig-param">'At': 1.7</em>, <em class="sig-param">'Au': 1.5</em>, <em class="sig-param">'B': 0.83</em>, <em class="sig-param">'Ba': 1.34</em>, <em class="sig-param">'Be': 0.35</em>, <em class="sig-param">'Bh': 1.6</em>, <em class="sig-param">'Bi': 1.54</em>, <em class="sig-param">'Bk': 1.5</em>, <em class="sig-param">'Br': 1.21</em>, <em class="sig-param">'C': 0.68</em>, <em class="sig-param">'Ca': 0.99</em>, <em class="sig-param">'Cd': 1.69</em>, <em class="sig-param">'Ce': 1.83</em>, <em class="sig-param">'Cf': 1.5</em>, <em class="sig-param">'Cl': 0.99</em>, <em class="sig-param">'Cm': 1.5</em>, <em class="sig-param">'Co': 1.33</em>, <em class="sig-param">'Cr': 1.35</em>, <em class="sig-param">'Cs': 1.67</em>, <em class="sig-param">'Cu': 1.52</em>, <em class="sig-param">'Db': 1.6</em>, <em class="sig-param">'Dy': 1.75</em>, <em class="sig-param">'Er': 1.73</em>, <em class="sig-param">'Es': 1.5</em>, <em class="sig-param">'Eu': 1.99</em>, <em class="sig-param">'F': 0.64</em>, <em class="sig-param">'Fe': 1.34</em>, <em class="sig-param">'Fm': 1.5</em>, <em class="sig-param">'Fr': 2</em>, <em class="sig-param">'Ga': 1.22</em>, <em class="sig-param">'Gd': 1.79</em>, <em class="sig-param">'Ge': 1.17</em>, <em class="sig-param">'H': 0.23</em>, <em class="sig-param">'He': 0.93</em>, <em class="sig-param">'Hf': 1.57</em>, <em class="sig-param">'Hg': 1.7</em>, <em class="sig-param">'Ho': 1.74</em>, <em class="sig-param">'Hs': 1.6</em>, <em class="sig-param">'I': 1.4</em>, <em class="sig-param">'In': 1.63</em>, <em class="sig-param">'Ir': 1.32</em>, <em class="sig-param">'K': 1.33</em>, <em class="sig-param">'Kr': 1.91</em>, <em class="sig-param">'La': 1.87</em>, <em class="sig-param">'Li': 0.68</em>, <em class="sig-param">'Lr': 1.5</em>, <em class="sig-param">'Lu': 1.72</em>, <em class="sig-param">'Md': 1.5</em>, <em class="sig-param">'Mg': 1.1</em>, <em class="sig-param">'Mn': 1.35</em>, <em class="sig-param">'Mo': 1.47</em>, <em class="sig-param">'Mt': 1.6</em>, <em class="sig-param">'N': 0.68</em>, <em class="sig-param">'Na': 0.97</em>, <em class="sig-param">'Nb': 1.48</em>, <em class="sig-param">'Nd': 1.81</em>, <em class="sig-param">'Ne': 1.12</em>, <em class="sig-param">'Ni': 1.5</em>, <em class="sig-param">'No': 1.5</em>, <em class="sig-param">'Np': 1.55</em>, <em class="sig-param">'O': 0.68</em>, <em class="sig-param">'Os': 1.37</em>, <em class="sig-param">'P': 0.75</em>, <em class="sig-param">'Pa': 1.61</em>, <em class="sig-param">'Pb': 1.54</em>, <em class="sig-param">'Pd': 1.5</em>, <em class="sig-param">'Pm': 1.8</em>, <em class="sig-param">'Po': 1.68</em>, <em class="sig-param">'Pr': 1.82</em>, <em class="sig-param">'Pt': 1.5</em>, <em class="sig-param">'Pu': 1.53</em>, <em class="sig-param">'Ra': 1.9</em>, <em class="sig-param">'Rb': 1.47</em>, <em class="sig-param">'Re': 1.35</em>, <em class="sig-param">'Rf': 1.6</em>, <em class="sig-param">'Rh': 1.45</em>, <em class="sig-param">'Rn': 2.4</em>, <em class="sig-param">'Ru': 1.4</em>, <em class="sig-param">'S': 1.02</em>, <em class="sig-param">'Sb': 1.46</em>, <em class="sig-param">'Sc': 1.44</em>, <em class="sig-param">'Se': 1.22</em>, <em class="sig-param">'Sg': 1.6</em>, <em class="sig-param">'Si': 1.2</em>, <em class="sig-param">'Sm': 1.8</em>, <em class="sig-param">'Sn': 1.46</em>, <em class="sig-param">'Sr': 1.12</em>, <em class="sig-param">'Ta': 1.43</em>, <em class="sig-param">'Tb': 1.76</em>, <em class="sig-param">'Tc': 1.35</em>, <em class="sig-param">'Te': 1.47</em>, <em class="sig-param">'Th': 1.79</em>, <em class="sig-param">'Ti': 1.47</em>, <em class="sig-param">'Tl': 1.55</em>, <em class="sig-param">'Tm': 1.72</em>, <em class="sig-param">'U': 1.58</em>, <em class="sig-param">'V': 1.33</em>, <em class="sig-param">'W': 1.37</em>, <em class="sig-param">'Xe': 1.98</em>, <em class="sig-param">'Y': 1.78</em>, <em class="sig-param">'Yb': 1.94</em>, <em class="sig-param">'Zn': 1.45</em>, <em class="sig-param">'Zr': 1.56}</em>, <em class="sig-param">standardize=True</em>, <em class="sig-param">larger_cell=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pymatgen/analysis/dimensionality.html#get_dimensionality_cheon"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pymatgen.analysis.dimensionality.get_dimensionality_cheon" title="Permalink to this definition">¶</a></dt>
+<dl class="py function">
+<dt class="sig sig-object py" id="pymatgen.analysis.dimensionality.get_dimensionality_cheon">
+<span class="sig-name descname"><span class="pre">get_dimensionality_cheon</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">structure_raw</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tolerance</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.45</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ldict</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">standardize</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">larger_cell</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/materialsproject/pymatgen/blob/v2023.3.10/pymatgen/core/../analysis/dimensionality.py#L299-L385"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pymatgen.analysis.dimensionality.get_dimensionality_cheon" title="Permalink to this definition"></a></dt>
 <dd><p>Algorithm for finding the dimensions of connected subunits in a structure.
 This method finds the dimensionality of the material even when the material
 is not layered along low-index planes, or does not have flat
@@ -170,7 +242,7 @@ Email: “<a class="reference external" href="mailto:gcheon&#37;&#52;&#48;stanfo
 E. J. Data Mining for New Two- and One-Dimensional Weakly Bonded Solids and
 Lattice-Commensurate Heterostructures. Nano Lett. 2017.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>structure_raw</strong> (<a class="reference internal" href="pymatgen.core.structure.html#pymatgen.core.structure.Structure" title="pymatgen.core.structure.Structure"><em>Structure</em></a>) – A pymatgen Structure object.</p></li>
 <li><p><strong>tolerance</strong> (<em>float</em>) – length in angstroms used in finding bonded atoms.
@@ -182,26 +254,26 @@ Values from JMol are used as default</p></li>
 <li><p><strong>standardize</strong> – works with conventional standard structures if True. It is
 recommended to keep this as True.</p></li>
 <li><p><strong>larger_cell</strong> – <p>tests with 3x3x3 supercell instead of 2x2x2. Testing with
-2x2x2 supercell is faster but misclssifies rare interpenetrated 3D</p>
+2x2x2 supercell is faster but misclassifies rare interpenetrated 3D</p>
 <blockquote>
 <div><p>structures. Testing with a larger cell circumvents this problem</p>
 </div></blockquote>
 </p></li>
 </ul>
 </dd>
-<dt class="field-even">Returns</dt>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p>dimension of the largest cluster as a string. If there are ions
 or molecules it returns ‘intercalated ion/molecule’</p>
 </dd>
-<dt class="field-odd">Return type</dt>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p>(str)</p>
 </dd>
 </dl>
 </dd></dl>
 
-<dl class="function">
-<dt id="pymatgen.analysis.dimensionality.get_dimensionality_gorai">
-<code class="sig-name descname">get_dimensionality_gorai</code><span class="sig-paren">(</span><em class="sig-param">structure</em>, <em class="sig-param">max_hkl=2</em>, <em class="sig-param">el_radius_updates=None</em>, <em class="sig-param">min_slab_size=5</em>, <em class="sig-param">min_vacuum_size=5</em>, <em class="sig-param">standardize=True</em>, <em class="sig-param">bonds=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pymatgen/analysis/dimensionality.html#get_dimensionality_gorai"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pymatgen.analysis.dimensionality.get_dimensionality_gorai" title="Permalink to this definition">¶</a></dt>
+<dl class="py function">
+<dt class="sig sig-object py" id="pymatgen.analysis.dimensionality.get_dimensionality_gorai">
+<span class="sig-name descname"><span class="pre">get_dimensionality_gorai</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">structure</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_hkl</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">el_radius_updates</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">min_slab_size</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">5</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">min_vacuum_size</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">5</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">standardize</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bonds</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/materialsproject/pymatgen/blob/v2023.3.10/pymatgen/core/../analysis/dimensionality.py#L494-L557"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pymatgen.analysis.dimensionality.get_dimensionality_gorai" title="Permalink to this definition"></a></dt>
 <dd><p>This method returns whether a structure is 3D, 2D (layered), or 1D (linear
 chains or molecules) according to the algorithm published in Gorai, P.,
 Toberer, E. &amp; Stevanovic, V. Computational Identification of Promising
@@ -214,7 +286,7 @@ el_radius_updates to update atomic radii for auto-detection of max bond
 distances, or bonds to explicitly specify max bond distances for atom pairs.
 Note that if you pass both, el_radius_updates are ignored.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>structure</strong> – (Structure) structure to analyze dimensionality for</p></li>
 <li><p><strong>max_hkl</strong> – (int) max index of planes to look for layers</p></li>
@@ -237,9 +309,9 @@ defined as {(“P”, “O”): 3}.</p></li>
 </dl>
 </dd></dl>
 
-<dl class="function">
-<dt id="pymatgen.analysis.dimensionality.get_dimensionality_larsen">
-<code class="sig-name descname">get_dimensionality_larsen</code><span class="sig-paren">(</span><em class="sig-param">bonded_structure</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pymatgen/analysis/dimensionality.html#get_dimensionality_larsen"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pymatgen.analysis.dimensionality.get_dimensionality_larsen" title="Permalink to this definition">¶</a></dt>
+<dl class="py function">
+<dt class="sig sig-object py" id="pymatgen.analysis.dimensionality.get_dimensionality_larsen">
+<span class="sig-name descname"><span class="pre">get_dimensionality_larsen</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">bonded_structure</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/materialsproject/pymatgen/blob/v2023.3.10/pymatgen/core/../analysis/dimensionality.py#L44-L72"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pymatgen.analysis.dimensionality.get_dimensionality_larsen" title="Permalink to this definition"></a></dt>
 <dd><p>Gets the dimensionality of a bonded structure.</p>
 <p>The dimensionality of the structure is the highest dimensionality of all
 structure components. This method is very robust and can handle
@@ -255,23 +327,23 @@ of the NearNeighbor classes. For example, using the CrystalNN class:</p>
 scoring parameter to identify low-dimensional materials components.
 Phys. Rev. Materials 3, 034003 (2019).</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>bonded_structure</strong> (<a class="reference internal" href="pymatgen.analysis.graphs.html#pymatgen.analysis.graphs.StructureGraph" title="pymatgen.analysis.graphs.StructureGraph"><em>StructureGraph</em></a>) – A structure with bonds, represented
 as a pymatgen structure graph. For example, generated using the
 CrystalNN.get_bonded_structure() method.</p>
 </dd>
-<dt class="field-even">Returns</dt>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p>The dimensionality of the structure.</p>
 </dd>
-<dt class="field-odd">Return type</dt>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p>(int)</p>
 </dd>
 </dl>
 </dd></dl>
 
-<dl class="function">
-<dt id="pymatgen.analysis.dimensionality.get_structure_components">
-<code class="sig-name descname">get_structure_components</code><span class="sig-paren">(</span><em class="sig-param">bonded_structure</em>, <em class="sig-param">inc_orientation=False</em>, <em class="sig-param">inc_site_ids=False</em>, <em class="sig-param">inc_molecule_graph=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pymatgen/analysis/dimensionality.html#get_structure_components"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pymatgen.analysis.dimensionality.get_structure_components" title="Permalink to this definition">¶</a></dt>
+<dl class="py function">
+<dt class="sig sig-object py" id="pymatgen.analysis.dimensionality.get_structure_components">
+<span class="sig-name descname"><span class="pre">get_structure_components</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">bonded_structure</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">inc_orientation</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">inc_site_ids</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">inc_molecule_graph</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/materialsproject/pymatgen/blob/v2023.3.10/pymatgen/core/../analysis/dimensionality.py#L75-L168"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pymatgen.analysis.dimensionality.get_structure_components" title="Permalink to this definition"></a></dt>
 <dd><p>Gets information on the components in a bonded structure.</p>
 <p>Correctly determines the dimensionality of all structures, regardless of
 structure type or improper connections due to periodic boundary conditions.</p>
@@ -285,7 +357,7 @@ of the NearNeighbor classes. For example, using the CrystalNN class:</p>
 scoring parameter to identify low-dimensional materials components.
 Phys. Rev. Materials 3, 034003 (2019).</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>bonded_structure</strong> (<a class="reference internal" href="pymatgen.analysis.graphs.html#pymatgen.analysis.graphs.StructureGraph" title="pymatgen.analysis.graphs.StructureGraph"><em>StructureGraph</em></a>) – A structure with bonds, represented
 as a pymatgen structure graph. For example, generated using the
@@ -299,7 +371,7 @@ of the sites in the structure component.</p></li>
 objects for zero-dimensional components.</p></li>
 </ul>
 </dd>
-<dt class="field-even">Returns</dt>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p><p>Information on the components in a structure as a list
 of dictionaries with the keys:</p>
 <ul class="simple">
@@ -331,20 +403,20 @@ of dictionaries with the keys:</p>
 </ul>
 </p>
 </dd>
-<dt class="field-odd">Return type</dt>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p>(list of dict)</p>
 </dd>
 </dl>
 </dd></dl>
 
-<dl class="function">
-<dt id="pymatgen.analysis.dimensionality.zero_d_graph_to_molecule_graph">
-<code class="sig-name descname">zero_d_graph_to_molecule_graph</code><span class="sig-paren">(</span><em class="sig-param">bonded_structure</em>, <em class="sig-param">graph</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pymatgen/analysis/dimensionality.html#zero_d_graph_to_molecule_graph"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pymatgen.analysis.dimensionality.zero_d_graph_to_molecule_graph" title="Permalink to this definition">¶</a></dt>
+<dl class="py function">
+<dt class="sig sig-object py" id="pymatgen.analysis.dimensionality.zero_d_graph_to_molecule_graph">
+<span class="sig-name descname"><span class="pre">zero_d_graph_to_molecule_graph</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">bonded_structure</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">graph</span></span></em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/materialsproject/pymatgen/blob/v2023.3.10/pymatgen/core/../analysis/dimensionality.py#L248-L296"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pymatgen.analysis.dimensionality.zero_d_graph_to_molecule_graph" title="Permalink to this definition"></a></dt>
 <dd><p>Converts a zero-dimensional networkx Graph object into a MoleculeGraph.</p>
 <p>Implements a similar breadth-first search to that in
 calculate_dimensionality_of_site().</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>bonded_structure</strong> (<a class="reference internal" href="pymatgen.analysis.graphs.html#pymatgen.analysis.graphs.StructureGraph" title="pymatgen.analysis.graphs.StructureGraph"><em>StructureGraph</em></a>) – A structure with bonds, represented
 as a pymatgen structure graph. For example, generated using the
@@ -353,61 +425,44 @@ CrystalNN.get_bonded_structure() method.</p></li>
 interest.</p></li>
 </ul>
 </dd>
-<dt class="field-even">Returns</dt>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p>A MoleculeGraph object of the component.</p>
 </dd>
-<dt class="field-odd">Return type</dt>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p>(<a class="reference internal" href="pymatgen.analysis.graphs.html#pymatgen.analysis.graphs.MoleculeGraph" title="pymatgen.analysis.graphs.MoleculeGraph">MoleculeGraph</a>)</p>
 </dd>
 </dl>
 </dd></dl>
 
-</div>
+</section>
 
 
+           </div>
           </div>
-        </div>
-      </div>
-      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
-        <div class="sphinxsidebarwrapper">
-  <div role="note" aria-label="source link">
-    <h3>This Page</h3>
-    <ul class="this-page-menu">
-      <li><a href="_sources/pymatgen.analysis.dimensionality.rst.txt"
-            rel="nofollow">Show Source</a></li>
-    </ul>
-   </div>
-<div id="searchbox" style="display: none" role="search">
-  <h3 id="searchlabel">Quick search</h3>
-    <div class="searchformwrapper">
-    <form class="search" action="search.html" method="get">
-      <input type="text" name="q" aria-labelledby="searchlabel" />
-      <input type="submit" value="Go" />
-    </form>
-    </div>
-</div>
-<script type="text/javascript">$('#searchbox').show(0);</script>
-        </div>
-      </div>
-      <div class="clearer"></div>
-    </div>
-    <div class="related" role="navigation" aria-label="related navigation">
-      <h3>Navigation</h3>
-      <ul>
-        <li class="right" style="margin-right: 10px">
-          <a href="genindex.html" title="General Index"
-             >index</a></li>
-        <li class="right" >
-          <a href="py-modindex.html" title="Python Module Index"
-             >modules</a> |</li>
-        <li class="nav-item nav-item-0"><a href="index.html">pymatgen 2019.11.11 documentation</a> &#187;</li> 
-      </ul>
-    </div>
+          <footer>
 
-    <div class="footer" role="contentinfo">
-        &#169; Copyright 2011, Pymatgen Development Team.
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 2.2.1.
-    </div>
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2011, Pymatgen Development Team.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+ 
 <div class="footer">This page uses <a href="http://analytics.google.com/">
 Google Analytics</a> to collect statistics. You can disable it by blocking
 the JavaScript coming from www.google-analytics.com.
@@ -422,5 +477,6 @@ the JavaScript coming from www.google-analytics.com.
 </script>
 </div>
 
-  </body>
+
+</body>
 </html>
